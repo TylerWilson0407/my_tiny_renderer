@@ -3,6 +3,9 @@
 
 void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
     
+    // Set steep bool
+    bool steep = (std::abs(y1 - y0) > std::abs(x1 - x0)) ? true : false;
+    
     // Swap points if x0 > x1
     if (x0 > x1) {
         std::swap(x0, x1);
@@ -17,12 +20,6 @@ void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
     if (dy < 0) {
         dy = -dy;
         yincr = -1;
-    }
-    
-    // Set steep bool, used to increment by y instead of x if slope > 1
-    bool steep = false;
-    if (dy > dx) {
-        steep = true;
     }
     
     // error term
