@@ -9,14 +9,20 @@
             <header-extensions>h</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
-            <sourceRootList/>
+            <sourceRootList>
+                <sourceRootElem>.</sourceRootElem>
+            </sourceRootList>
             <confList>
                 <confElem>
-                    <name>Debug</name>
+                    <name>Debug_win64</name>
                     <type>1</type>
                 </confElem>
                 <confElem>
-                    <name>Release</name>
+                    <name>Release_win64</name>
+                    <type>1</type>
+                </confElem>
+                <confElem>
+                    <name>Debug_linux</name>
                     <type>1</type>
                 </confElem>
             </confList>

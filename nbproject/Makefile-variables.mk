@@ -6,22 +6,22 @@
 CND_BASEDIR=`pwd`
 CND_BUILDDIR=build
 CND_DISTDIR=dist
-# Debug configuration
-CND_PLATFORM_Debug=Cygwin-Windows
-CND_ARTIFACT_DIR_Debug=dist/Debug/Cygwin-Windows
-CND_ARTIFACT_NAME_Debug=my_tiny_renderer
-CND_ARTIFACT_PATH_Debug=dist/Debug/Cygwin-Windows/my_tiny_renderer
-CND_PACKAGE_DIR_Debug=dist/Debug/Cygwin-Windows/package
-CND_PACKAGE_NAME_Debug=mytinyrenderer.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/Cygwin-Windows/package/mytinyrenderer.tar
-# Release configuration
-CND_PLATFORM_Release=Cygwin-Windows
-CND_ARTIFACT_DIR_Release=dist/Release/Cygwin-Windows
-CND_ARTIFACT_NAME_Release=my_tiny_renderer
-CND_ARTIFACT_PATH_Release=dist/Release/Cygwin-Windows/my_tiny_renderer
-CND_PACKAGE_DIR_Release=dist/Release/Cygwin-Windows/package
-CND_PACKAGE_NAME_Release=mytinyrenderer.tar
-CND_PACKAGE_PATH_Release=dist/Release/Cygwin-Windows/package/mytinyrenderer.tar
+# Debug_win64 configuration
+CND_PLATFORM_Debug_win64=GNU-Linux
+CND_ARTIFACT_DIR_Debug_win64=dist/Debug_win64/GNU-Linux
+CND_ARTIFACT_NAME_Debug_win64=my_tiny_renderer
+CND_ARTIFACT_PATH_Debug_win64=dist/Debug_win64/GNU-Linux/my_tiny_renderer
+CND_PACKAGE_DIR_Debug_win64=dist/Debug_win64/GNU-Linux/package
+CND_PACKAGE_NAME_Debug_win64=mytinyrenderer.tar
+CND_PACKAGE_PATH_Debug_win64=dist/Debug_win64/GNU-Linux/package/mytinyrenderer.tar
+# Debug_linux configuration
+CND_PLATFORM_Debug_linux=GNU-Linux
+CND_ARTIFACT_DIR_Debug_linux=dist/Debug_linux/GNU-Linux
+CND_ARTIFACT_NAME_Debug_linux=my_tiny_renderer
+CND_ARTIFACT_PATH_Debug_linux=dist/Debug_linux/GNU-Linux/my_tiny_renderer
+CND_PACKAGE_DIR_Debug_linux=dist/Debug_linux/GNU-Linux/package
+CND_PACKAGE_NAME_Debug_linux=mytinyrenderer.tar
+CND_PACKAGE_PATH_Debug_linux=dist/Debug_linux/GNU-Linux/package/mytinyrenderer.tar
 #
 # include compiler specific variables
 #

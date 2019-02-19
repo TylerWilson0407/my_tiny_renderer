@@ -1,10 +1,13 @@
-#include <utility>
 #include "tgaimage.h"
 
-void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
+void bresenham_line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
     
-    // Set steep bool
+    // Set steep bool if slope > 1 and swap x/y if so
     bool steep = (std::abs(y1 - y0) > std::abs(x1 - x0)) ? true : false;
+    if (steep) {
+        std::swap(x0, y0);
+        std::swap(x1, y1);
+    }
     
     // Swap points if x0 > x1
     if (x0 > x1) {
@@ -14,7 +17,9 @@ void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
     
     const int dx = x1 - x0;
     int dy = y1 - y0;
+    int y = y0;
     int yincr = 1;
+    int err = 0;
     
     // Set y to decrement if slope is negative
     if (dy < 0) {
@@ -22,11 +27,10 @@ void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
         yincr = -1;
     }
     
-    // error term
-    int err = 0;
-    
+    /* Transpose line (image.set(y, x, color) instead of (x, y, color) if steep 
+     * since we swapped x/y if steep.
+     */
     if (!steep) {
-        int y = y0;
         for (int x = x0; x <= x1; x++) {
 
             image.set(x, y, color);
@@ -40,19 +44,56 @@ void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
 
         }
     } else {
-        int x = x0;
-        for (int y = y0; y <= y1; y++) {
+        for (int x = x0; x <= x1; x++) {
 
-            image.set(x, y, color);
+            image.set(y, x, color);
 
-            if (2 * (err + dx) < dy) {
-                err += dx;
+            if (2 * (err + dy) < dx) {
+                err += dy;
             } else {
-                x += yincr;
-                err += dx-dy;
+                y += yincr;
+                err += dy-dx;
             }
 
         }
+    }
+    return;
+}
+
+void horiz_line(int x0, int x1, int y, TGAImage &image, TGAColor color) {
+    if (x0 > x1) {
+        std::swap(x0, x1);
+    }
+    
+    for (int x = x0; x <= x1; x++) {
+        image.set(x, y, color);
+    }
+    return;
+}
+
+void vert_line(int x, int y0, int y1, TGAImage &image, TGAColor color) {
+    if (y0 > y1) {
+        std::swap(y0, y1);
+    }
+    
+    for (int y = y0; y <= y1; y++) {
+        image.set(x, y, color);
+    }
+    return;
+}
+
+void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
+    /* Given two coordinates (x0, y0) and (x1, y1), draws a line of given color
+     on the input image. Note that the bresenham_line function can handle 
+     horizontal and vertical lines, however they have been given their own 
+     functions for optimization purposes.*/
+    
+    if (x0 == x1) {
+        vert_line(x0, y0, y1, image, color);
+    } else if (y0 == y1) {
+        horiz_line(x0, x1, y1, image, color);
+    } else {
+        bresenham_line(x0, y0, x1, y1, image, color);
     }
     return;
 }
