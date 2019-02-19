@@ -1,4 +1,32 @@
+#include <algorithm>
+#include <vector>
+#include "drawing.h"
 #include "tgaimage.h"
+
+// Utility functions
+bool comp_point_x(Point& p0, Point& p1) {
+    return (p0.x < p1.x);
+}
+
+// Data structures
+//struct Point {};
+
+// Line drawing functions
+void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
+    /* Given two coordinates (x0, y0) and (x1, y1), draws a line of given color
+     on the input image. Note that the bresenham_line function can handle 
+     horizontal and vertical lines, however they have been given their own 
+     functions for optimization purposes.*/
+    
+    if (x0 == x1) {
+        vert_line(x0, y0, y1, image, color);
+    } else if (y0 == y1) {
+        horiz_line(x0, x1, y1, image, color);
+    } else {
+        bresenham_line(x0, y0, x1, y1, image, color);
+    }
+    return;
+}
 
 void bresenham_line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
     
@@ -82,18 +110,16 @@ void vert_line(int x, int y0, int y1, TGAImage &image, TGAColor color) {
     return;
 }
 
-void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
-    /* Given two coordinates (x0, y0) and (x1, y1), draws a line of given color
-     on the input image. Note that the bresenham_line function can handle 
-     horizontal and vertical lines, however they have been given their own 
-     functions for optimization purposes.*/
+// Triangle drawing functions
+void triangle_v0 (Point p0, Point p1, Point p2, TGAImage &image, TGAColor color) {
     
-    if (x0 == x1) {
-        vert_line(x0, y0, y1, image, color);
-    } else if (y0 == y1) {
-        horiz_line(x0, x1, y1, image, color);
-    } else {
-        bresenham_line(x0, y0, x1, y1, image, color);
+    // add points to vector and sort by increasing x-value
+    std::vector<Point> pts {p0, p1, p2};
+    std::sort(pts.begin(), pts.end(), comp_point_x);
+    
+    for (int x = pts[0].x; x < pts[1].x; x++) {
+        
     }
+    
     return;
 }

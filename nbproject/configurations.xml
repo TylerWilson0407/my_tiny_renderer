@@ -4,8 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>drawing.h</itemPath>
       <itemPath>tinyrenderer-files/geometry.h</itemPath>
-      <itemPath>line.h</itemPath>
       <itemPath>tinyrenderer-files/model.h</itemPath>
       <itemPath>tests.h</itemPath>
       <itemPath>tinyrenderer-files/tgaimage.h</itemPath>
@@ -17,8 +17,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>drawing.cpp</itemPath>
       <itemPath>tinyrenderer-files/geometry.cpp</itemPath>
-      <itemPath>line.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
       <itemPath>tinyrenderer-files/model.cpp</itemPath>
       <itemPath>tests.cpp</itemPath>
@@ -35,8 +35,20 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
   </logicalFolder>
   <sourceRootList>
+    <Elem>.</Elem>
     <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
@@ -54,9 +66,9 @@
           </incDir>
         </ccTool>
       </compileType>
-      <item path="line.cpp" ex="false" tool="1" flavor2="0">
+      <item path="drawing.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="line.h" ex="false" tool="3" flavor2="0">
+      <item path="drawing.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -100,9 +112,9 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="line.cpp" ex="false" tool="1" flavor2="0">
+      <item path="drawing.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="line.h" ex="false" tool="3" flavor2="0">
+      <item path="drawing.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -136,9 +148,9 @@
           </incDir>
         </ccTool>
       </compileType>
-      <item path="line.cpp" ex="false" tool="1" flavor2="0">
+      <item path="drawing.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="line.h" ex="false" tool="3" flavor2="0">
+      <item path="drawing.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>

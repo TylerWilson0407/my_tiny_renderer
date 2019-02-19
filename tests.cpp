@@ -4,10 +4,11 @@
  * and open the template in the editor.
  */
 
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <vector>
-#include "line.h"
+#include "drawing.h"
 #include "model.h"
 #include "tgaimage.h"
 #include "tests.h"
@@ -53,16 +54,28 @@ void line_test() {
     line(60, 90, 60, 90, image, blue); //single point
     line(90, 90, 110, 150, image, white); //point outside image
     
-    image.write_tga_file("output.tga");
+    image.write_tga_file("output/line_test.tga");
     
     return;
 }
 
-void type_test() {
+void small_test() {
     
-    int x = 1.82555;
+    Point p0(6, 7);
+    Point p1(10, 4);
+    Point p2(1, 12);
     
-    cout << x << endl;
+    vector<Point> pts {p0, p1, p2};
+    sort(pts.begin(), pts.end(), comp_point_x);
+    
+//    Point pts[3] = {p0, p1, p2};
+    
+//    sort(begin(pts), end(pts), comp_pts_by_y);
+    
+    cout << p0.x << ", " << p0.y << endl;
+    cout << p1.x << ", " << p1.y << endl;
+    cout << p2.x << ", " << p2.y << endl;
+    cout << pts[0].x << ". " << pts[0].y << endl;
     
 }
 
@@ -108,7 +121,22 @@ void wireframe_test() {
     
     // Flip image vertically as it is drawn upside-down
     image.flip_vertically();
-    image.write_tga_file("wireframe.tga");
+    image.write_tga_file("output/wireframe_test.tga");
+    
+    return;
+}
+
+void triangle_test() {
+    
+    TGAImage image(100, 100, TGAImage::RGB);
+    const TGAColor white(255, 255, 255, 255);
+    const TGAColor red(255, 0, 0, 255);
+    const TGAColor green(0, 255, 0, 255);
+    const TGAColor blue(0, 0, 255, 255);
+    
+    
+    
+    image.write_tga_file("output/triangle_test.tga");
     
     return;
 }

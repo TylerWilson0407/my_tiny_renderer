@@ -13,9 +13,11 @@
  */
 int main(int argc, char** argv) {
     
-    wireframe_test();
+//    line_test();
+//    wireframe_test();
+//    triangle_test();
     
-//    type_test();
+    small_test();
     
     return 0;
 }

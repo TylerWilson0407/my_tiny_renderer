@@ -16,9 +16,11 @@
 
 void line_test();
 
-void type_test();
+void small_test();
 
 void wireframe_test();
+
+void triangle_test();
 
 #endif /* TESTS_H */
 

@@ -23,7 +23,7 @@ AS=as
 # Macros
 CND_PLATFORM=Cygwin-Windows
 CND_DLIB_EXT=dll
-CND_CONF=Debug_win64
+CND_CONF=Release_win64
 CND_DISTDIR=dist
 CND_BUILDDIR=build
 
@@ -70,32 +70,32 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/my_tiny_renderer.exe: ${OBJECTFILES}
 ${OBJECTDIR}/drawing.o: drawing.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/drawing.o drawing.cpp
+	$(COMPILE.cc) -O2 -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/drawing.o drawing.cpp
 
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -O2 -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 ${OBJECTDIR}/tests.o: tests.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tests.o tests.cpp
+	$(COMPILE.cc) -O2 -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tests.o tests.cpp
 
 ${OBJECTDIR}/tinyrenderer-files/geometry.o: tinyrenderer-files/geometry.cpp
 	${MKDIR} -p ${OBJECTDIR}/tinyrenderer-files
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyrenderer-files/geometry.o tinyrenderer-files/geometry.cpp
+	$(COMPILE.cc) -O2 -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyrenderer-files/geometry.o tinyrenderer-files/geometry.cpp
 
 ${OBJECTDIR}/tinyrenderer-files/model.o: tinyrenderer-files/model.cpp
 	${MKDIR} -p ${OBJECTDIR}/tinyrenderer-files
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyrenderer-files/model.o tinyrenderer-files/model.cpp
+	$(COMPILE.cc) -O2 -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyrenderer-files/model.o tinyrenderer-files/model.cpp
 
 ${OBJECTDIR}/tinyrenderer-files/tgaimage.o: tinyrenderer-files/tgaimage.cpp
 	${MKDIR} -p ${OBJECTDIR}/tinyrenderer-files
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyrenderer-files/tgaimage.o tinyrenderer-files/tgaimage.cpp
+	$(COMPILE.cc) -O2 -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyrenderer-files/tgaimage.o tinyrenderer-files/tgaimage.cpp
 
 # Subprojects
 .build-subprojects:
