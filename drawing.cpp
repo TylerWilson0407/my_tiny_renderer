@@ -4,13 +4,15 @@
 #include "tgaimage.h"
 
 // utility functions
-bool comp_point_y(Point& p0, Point& p1) {
-    return (p0.y < p1.y);
-}
 
-/* cross product of two 2D vectors with integer components.  Resulting vector 
+// unused atm - remove??
+//bool comp_point_y(Point& p0, Point& p1) {
+//    return (p0.y < p1.y);
+//}
+
+int cross2I(Point& v0, Point& v1) {
+    /* cross product of 2D vectors with integer components.  Resulting vector 
  * points in z-direction.  Vectors represented as Points(vec = 0 -> point) */
-int cross_product(Point v0, Point v1) {
     
     int k = (v0.x * v1.y) - (v0.y * v1.x);
     
@@ -117,19 +119,18 @@ void vert_line(int x, int y0, int y1, TGAImage &image, TGAColor color) {
 }
 
 // triangle drawing functions
-void triangle (Point p0, Point p1, Point p2, TGAImage &image, TGAColor color) {
+void triangle (Point A, Point B, Point C, TGAImage &image, TGAColor color) {
     
     // add points into array
-    Point pts[] = {p0, p1, p2};
+    Point pts[] = {A, B, C};
     
-    /* make vectors(represented as Points) for (p0 -> p1) and (p0 -> p2) 
-     * and put into array*/
+    /* make vectors(represented as Points) for AB and AC and put into array*/
     Point vecs[2];
     for (int i = 0; i < 2; i++) {
         vecs[i] = pts[i + 1] - pts[0];
     }
     
-    int v1v2_cross_mag = std::abs(cross_product(vecs[0], vecs[1]));
+    int ABAC_cross = cross2I(vecs[0], vecs[1]);
     
     for (int y = pts[0].y; y < pts[1].y; y++) {
         
