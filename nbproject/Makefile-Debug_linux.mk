@@ -35,7 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/line.o \
+	${OBJECTDIR}/drawing.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/tests.o \
 	${OBJECTDIR}/tinyrenderer-files/geometry.o \
@@ -67,10 +67,10 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/my_tiny_renderer: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/my_tiny_renderer ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/line.o: line.cpp
+${OBJECTDIR}/drawing.o: drawing.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/line.o line.cpp
+	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/drawing.o drawing.cpp
 
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}

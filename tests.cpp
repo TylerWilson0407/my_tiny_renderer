@@ -66,16 +66,19 @@ void small_test() {
     Point p2(1, 12);
     
     vector<Point> pts {p0, p1, p2};
-    sort(pts.begin(), pts.end(), comp_point_x);
-    
-//    Point pts[3] = {p0, p1, p2};
-    
-//    sort(begin(pts), end(pts), comp_pts_by_y);
+    sort(pts.begin(), pts.end(), comp_point_y);
     
     cout << p0.x << ", " << p0.y << endl;
     cout << p1.x << ", " << p1.y << endl;
     cout << p2.x << ", " << p2.y << endl;
     cout << pts[0].x << ". " << pts[0].y << endl;
+    
+    Point pntadd = p0 + p1;
+    Point pntsub = p2 - p1;
+    Point pntund;
+    
+    cout << pntadd.x << ", " << pntadd.y << endl;
+    cout << pntsub.x << ", " << pntsub.y << endl;
     
 }
 
@@ -134,7 +137,7 @@ void triangle_test() {
     const TGAColor green(0, 255, 0, 255);
     const TGAColor blue(0, 0, 255, 255);
     
-    
+//    triangle()
     
     image.write_tga_file("output/triangle_test.tga");
     

@@ -1,8 +1,8 @@
-build/Debug_linux/GNU-Linux/tests.o: tests.cpp line.h \
+build/Debug_linux/GNU-Linux/tests.o: tests.cpp drawing.h \
  tinyrenderer-files/tgaimage.h tinyrenderer-files/model.h \
  tinyrenderer-files/geometry.h tinyrenderer-files/tgaimage.h tests.h
 
-line.h:
+drawing.h:
 
 tinyrenderer-files/tgaimage.h:
 
