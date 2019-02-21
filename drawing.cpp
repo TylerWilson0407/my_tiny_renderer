@@ -1,14 +1,10 @@
 #include <algorithm>
+#include <iostream>
 #include <vector>
 #include "drawing.h"
 #include "tgaimage.h"
 
 // utility functions
-
-// unused atm - remove??
-//bool comp_point_y(Point& p0, Point& p1) {
-//    return (p0.y < p1.y);
-//}
 
 int cross2I(Point& v0, Point& v1) {
     /* cross product of 2D vectors with integer components.  Resulting vector 
@@ -124,16 +120,53 @@ void triangle (Point A, Point B, Point C, TGAImage &image, TGAColor color) {
     // add points into array
     Point pts[] = {A, B, C};
     
+    /* get upper and lower bounds of x and y to create bounding box*/
+    // initialize with x/y of point A
+    int x_bound[] = {A.x, A.x};
+    int y_bound[] = {A.y, A.y};
+    
+    // loop through B and C looking for lesser/greater values of x/y
+    // REWRITE TO LOOP THROUGH {B, C}, looks cleaner!!!
+    for (Point* ptr = pts + 1; ptr <= pts + 2; ptr++) {
+        
+        if (ptr->x < x_bound[0]) {
+            x_bound[0] = ptr->x;
+        } else if (ptr->x > x_bound[1]) {
+            x_bound[1] = ptr->x;
+        }
+        
+        if (ptr->y < y_bound[0]) {
+            y_bound[0] = ptr->y;
+        } else if (ptr->y > y_bound[1]) {
+            y_bound[1] = ptr->y;
+        }
+    }
+    
+    std::cout << x_bound[0] << ", " << x_bound[1] << std::endl;
+    std::cout << y_bound[0] << ", " << y_bound[1] << std::endl;
+    
     /* make vectors(represented as Points) for AB and AC and put into array*/
     Point vecs[2];
     for (int i = 0; i < 2; i++) {
         vecs[i] = pts[i + 1] - pts[0];
     }
     
-    int ABAC_cross = cross2I(vecs[0], vecs[1]);
+    // use instead of vecs array??
+    Point AB = B - A;
+    Point AC = C - A;
     
-    for (int y = pts[0].y; y < pts[1].y; y++) {
-        
+    int ABxAC = cross2I(vecs[0], vecs[1]);
+    
+    for (int x = x_bound[0]; x < x_bound[1]; x++) {
+        for (int y = y_bound[0]; y < y_bound[1]; y++) {
+            
+            Point P(x, y);
+            Point AP = P - A;
+            
+            /* Calculate cross products here(note that multiplied thru by ABxAC
+             * as well).  Figure out best way to check for negative at each calc
+             * and go to next iteration if so*/
+        }
     }
     
     return;
