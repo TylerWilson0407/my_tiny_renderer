@@ -155,7 +155,8 @@ void triangle (Point A, Point B, Point C, TGAImage &image, TGAColor color) {
     Point AB = B - A;
     Point AC = C - A;
     
-    int ABxAC = cross2I(vecs[0], vecs[1]);
+    int ABxAC = -cross2I(vecs[0], vecs[1]);
+    std::cout << "ABxAC:" << ABxAC << std::endl;
     
     for (int x = x_bound[0]; x < x_bound[1]; x++) {
         for (int y = y_bound[0]; y < y_bound[1]; y++) {
@@ -166,6 +167,24 @@ void triangle (Point A, Point B, Point C, TGAImage &image, TGAColor color) {
             /* Calculate cross products here(note that multiplied thru by ABxAC
              * as well).  Figure out best way to check for negative at each calc
              * and go to next iteration if so*/
+            
+            // u value
+            int ACxAP = cross2I(AC, AP);
+            if (ACxAP > 0) {
+//                std::cout << "u:" << ACxAP << std::endl;
+                // v value
+                int ABxAP = cross2I(AB, AP);
+                if (ABxAP > 0) {
+//                    std::cout << "v:" << ABxAP << std::endl;
+                    // w value
+                    int w = ABxAC - ACxAP - ABxAP;
+                    if (w > 0) {
+//                        std::cout << "w:" << w << std::endl;
+                        image.set(x, y, color);
+                    }
+                }
+            }
+            
         }
     }
     
