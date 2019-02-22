@@ -22,5 +22,7 @@ void wireframe_test();
 
 void triangle_test();
 
+void triangle_model_test();
+
 #endif /* TESTS_H */
 

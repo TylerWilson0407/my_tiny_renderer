@@ -112,19 +112,80 @@ void wireframe_test() {
 
 void triangle_test() {
     
-    TGAImage image(100, 100, TGAImage::RGB);
+    TGAImage image(1000, 1000, TGAImage::RGB);
     const TGAColor white(255, 255, 255, 255);
     const TGAColor red(255, 0, 0, 255);
     const TGAColor green(0, 255, 0, 255);
     const TGAColor blue(0, 0, 255, 255);
     
-    Point A(20, 50);
-    Point B(80, 90);
-    Point C(40, 1);
+    image.set(1, 1, white);
+    image.set(1, 999, white);
+    image.set(999, 1, white);
+    image.set(999, 999, white);
+    
+    Vec2I A(760, 500);
+    Vec2I B(80, 900);
+    Vec2I C(440, 10);
+    
+    Vec2I D(750, 890);
     
     triangle(A, B, C, image, red);
+    triangle(A, D, B, image, green);
     
     image.write_tga_file("output/triangle_test.tga");
+    
+    return;
+}
+
+void triangle_model_test() {
+    
+    Model model("tinyrenderer-files/obj/african_head/african_head.obj");
+    
+    const int width = 1500;
+    const int height = 1500;
+    
+    TGAImage image(width, height, TGAImage::RGB);
+    const TGAColor white(255, 255, 255, 255);
+    const TGAColor red(255, 0, 0, 255);
+    const TGAColor green(0, 255, 0, 255);
+    const TGAColor blue(0, 0, 255, 255);
+    
+    vector<TGAColor> color_vec;
+    color_vec.push_back(white);
+    color_vec.push_back(red);
+    color_vec.push_back(green);
+    color_vec.push_back(blue);
+    
+    // Initialize RNG seed for random color generator
+    srand(time(NULL));
+    
+    for (int i = 0; i < model.nfaces(); i++) {
+        vector<int> face = model.face(i);
+        
+        Vec2I pts[3];
+        
+        for (int j = 0;j < 3; j++) {
+            Vec3f v = model.vert(face[j]);
+
+            /* Scale coordinate to size of image by adding 1(-1:1 -> 0:2) and 
+             * multiplying by width/height and dividing by 2*/
+            int x = (v[0] + 1) * width / 2;
+            int y = (v[1] + 1) * height / 2;
+            
+            cout << x << ", " << y << endl;
+            
+            Vec2I P(x, y);
+            pts[j] = P;
+
+//            line(x0, y0, x1, y1, image, rand_color());
+        }
+        
+        triangle(pts[0], pts[1], pts[2], image, rand_color());
+    }
+    
+    // Flip image vertically as it is drawn upside-down
+    image.flip_vertically();
+    image.write_tga_file("output/triangle_model_test.tga");
     
     return;
 }

@@ -17,7 +17,8 @@ int main(int argc, char** argv) {
 //    wireframe_test();
 //    triangle_test();
     
-    small_test();
+//    small_test();
+    triangle_model_test();
     
     return 0;
 }
