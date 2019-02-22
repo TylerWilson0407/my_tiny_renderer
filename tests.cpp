@@ -61,25 +61,6 @@ void line_test() {
 
 void small_test() {
     
-    Point p0(6, 7);
-    Point p1(10, 4);
-    Point p2(1, 12);
-    
-    vector<Point> pts {p0, p1, p2};
-    sort(pts.begin(), pts.end(), comp_point_y);
-    
-    cout << p0.x << ", " << p0.y << endl;
-    cout << p1.x << ", " << p1.y << endl;
-    cout << p2.x << ", " << p2.y << endl;
-    cout << pts[0].x << ". " << pts[0].y << endl;
-    
-    Point pntadd = p0 + p1;
-    Point pntsub = p2 - p1;
-    Point pntund;
-    
-    cout << pntadd.x << ", " << pntadd.y << endl;
-    cout << pntsub.x << ", " << pntsub.y << endl;
-    
 }
 
 void wireframe_test() {
@@ -137,7 +118,11 @@ void triangle_test() {
     const TGAColor green(0, 255, 0, 255);
     const TGAColor blue(0, 0, 255, 255);
     
-//    triangle()
+    Point A(20, 50);
+    Point B(80, 90);
+    Point C(40, 1);
+    
+    triangle(A, B, C, image, red);
     
     image.write_tga_file("output/triangle_test.tga");
     
