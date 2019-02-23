@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "drawing.h"
+#include "geometry.h"
 #include "tgaimage.h"
 
 // structures
@@ -49,7 +50,47 @@ bool inside_triangle(const Vec2I* pts, const Vec2I& P) {
     return false;
 }
 
+Vec3f barycentric(const Vec2I* pts, const Vec2I& P) {
+    /* Returns true if points P is inside triangle of points in pts*/
+    
+    // pre-compute values that are used multiple times
+    int y1_y2 = pts[1].y - pts[2].y;
+    int x2_x1 = pts[2].x - pts[1].x;
+    int x0_x2 = pts[0].x - pts[2].x;
+    int y0_y2 = pts[0].y - pts[2].y;
+    int y2_y0 = pts[2].y - pts[0].y;
+    
+    int det = (y1_y2 * x0_x2) + (x2_x1 * y0_y2);
+    
+    Vec3f lambda;
+    
+    lambda[0] = ((y1_y2 * (P.x - pts[2].x)) + (x2_x1 * (P.y - pts[2].y))) / (float)det;
+    if (lambda[0] >= 0) {
+        lambda[1]  = ((y2_y0 * (P.x - pts[2].x)) + (x0_x2 * (P.y - pts[2].y))) / (float)det ;
+        if (lambda[1] >= 0) {
+            lambda[2] = 1 - lambda[1] - lambda[0];
+            if (lambda[2] >= 0) {
+                return lambda;
+            }   
+        }
+    }
+    
+    return Vec3f(-1, -1, -1);
+}
 
+// expand this function to interpolate any types
+float z_interpolate(Vec3f bary, Vec3f z_vals) {
+    
+//    return (bary * z_vals);
+    
+    float z;
+    
+    for (int i=0; i<3;i++) {
+        z += bary[i] * z_vals[i];
+    }
+
+    return z;
+}
 
 // line drawing functions
 void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
@@ -206,6 +247,31 @@ void triangle (Vec2I* pts, TGAImage& image, TGAColor color) {
             
             if (inside_triangle(pts, P)) {
                 image.set(x, y, color);
+            }
+        }
+    }
+    
+    return;
+}
+
+void triangle_z (Vec2I* pts, Vec3f z_vals, float z_buffer[][750], TGAImage& image, TGAColor color) {
+
+    BoundingBox bbox(pts);
+    
+    for (int x = bbox.x_lower; x < bbox.x_upper; x++) {
+        for (int y = bbox.y_lower; y < bbox.y_upper; y++) {
+            
+            Vec2I P(x, y);
+            
+            Vec3f bc = barycentric(pts, P);
+            
+            float z = z_interpolate(bc, z_vals);
+            
+            if (bc[2] >= 0) {
+                if (z > (z_buffer[x][y])) {
+                    z_buffer[x][y] = z;
+                    image.set(x, y, color);
+                }
             }
         }
     }
