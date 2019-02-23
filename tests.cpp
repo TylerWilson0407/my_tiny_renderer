@@ -5,7 +5,7 @@
  */
 
 #include <algorithm>
-#include <climits>
+#include <cfloat>
 #include <iostream>
 #include <random>
 #include <vector>
@@ -61,10 +61,6 @@ void line_test() {
 }
 
 void small_test() {
-    
-    int zbuff[100][100] = {INT_MIN};
-    
-    std::cout << zbuff[0][0] << std::endl;
     
 }
 
@@ -162,13 +158,15 @@ void triangle_model_test() {
     color_vec.push_back(blue);
     
     // initialize z-buffer array
-    int z_buffer[width][height];
+    float z_buffer[width][height];
     
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++){
-            z_buffer[i][j] = INT_MIN;
+            z_buffer[i][j] = FLT_MIN;
         }
     }
+    
+    std::cout << z_buffer[400][400] << endl;
     
     // light direction vector
     Vec3f light_vec(0.f, 0.f, -1.f);
@@ -180,6 +178,7 @@ void triangle_model_test() {
         vector<int> face = model.face(i);
         
         Vec2I pts[3];
+        Vec3f z_vals;
         
         Vec3f verts[3];
         
@@ -193,6 +192,7 @@ void triangle_model_test() {
             
             Vec2I P(x, y);
             pts[j] = P;
+            z_vals[j] = verts[j][2];
 
 //            line(x0, y0, x1, y1, image, rand_color());
         }
@@ -206,14 +206,16 @@ void triangle_model_test() {
         
 //        triangle(pts[0], pts[1], pts[2], image, rand_color());
         if (intensity >= 0) {
-            triangle(pts, image, TGAColor(intensity*255, intensity*255, intensity*255, 255));
+            TGAColor color_intensity(intensity*255, intensity*255, intensity*255, 255);
+//            triangle(pts, image, color_intensity);
+            triangle_z(pts, z_vals, z_buffer, image, color_intensity);
         }
         
     }
     
     // Flip image vertically as it is drawn upside-down
     image.flip_vertically();
-    image.write_tga_file("output/triangle_model_test.tga");
+    image.write_tga_file("output/triangle_model_zbuff_test.tga");
     
     return;
 }

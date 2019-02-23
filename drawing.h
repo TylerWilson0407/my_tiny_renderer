@@ -8,6 +8,7 @@
 #ifndef DRAWING_H
 #define	DRAWING_H
 
+#include "geometry.h"
 #include "tgaimage.h"
 
 // data structures
@@ -74,6 +75,7 @@ void vert_line(int x0, int x1, int y, TGAImage &image, TGAColor color);
 // triangle drawing functions
 void triangle(Vec2I p0, Vec2I p1, Vec2I p2, TGAImage &image, TGAColor color);
 void triangle (Vec2I* pts, TGAImage& image, TGAColor color);
+void triangle_z (Vec2I* pts, Vec3f z_vals, float z_buffer[][750], TGAImage& image, TGAColor color);
 
 #endif	/* DRAWING_H */
 
