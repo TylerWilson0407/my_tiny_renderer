@@ -37,13 +37,10 @@ bool inside_triangle(const Vec2I* pts, const Vec2I& P) {
     
     int lambda_1 = sign_det * ((y1_y2 * (P.x - pts[2].x)) + (x2_x1 * (P.y - pts[2].y)));
     if (lambda_1 >= 0) {
-//        std::cout << "lambda1: " << lambda_1 << std::endl;
         int lambda_2  = sign_det * ((y2_y0 * (P.x - pts[2].x)) + (x0_x2 * (P.y - pts[2].y)));
         if (lambda_2 >= 0) {
-//            std::cout << "lambda2: " << lambda_2 << std::endl;
             int lambda_3 = det - sign_det * (lambda_1 + lambda_2);
             if ((sign_det>0) ? (lambda_3 > 0) : (lambda_3 < 0)) {
-//                std::cout << "lambda3: " << lambda_3 << std::endl;
                 return true;
             }   
         }
@@ -198,7 +195,7 @@ void triangle (Vec2I A, Vec2I B, Vec2I C, TGAImage &image, TGAColor color) {
     return;
 }
 
-void triangle (Vec2I* pts, TGAImage &image, TGAColor color) {
+void triangle (Vec2I* pts, TGAImage& image, TGAColor color) {
 
     BoundingBox bbox(pts);
     

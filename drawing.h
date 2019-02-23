@@ -40,13 +40,13 @@ struct BoundingBox {
     
     BoundingBox(Vec2I* points) {
         
-        // initialize 
+        // initialize bounds to x/y of first point
         x_lower = points[0].x;
         x_upper = points[0].x;
         y_lower = points[0].y;
         y_upper = points[0].y;
         
-        for (Vec2I* point = points + 1; point <= points + 2; point++) {
+        for (const Vec2I* point = points + 1; point <= points + 2; point++) {
         
             if (point->x < x_lower) {
                 x_lower = point->x;
@@ -73,6 +73,7 @@ void vert_line(int x0, int x1, int y, TGAImage &image, TGAColor color);
 
 // triangle drawing functions
 void triangle(Vec2I p0, Vec2I p1, Vec2I p2, TGAImage &image, TGAColor color);
+void triangle (Vec2I* pts, TGAImage& image, TGAColor color);
 
 #endif	/* DRAWING_H */
 

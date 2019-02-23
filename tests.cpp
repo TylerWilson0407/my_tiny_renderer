@@ -5,6 +5,7 @@
  */
 
 #include <algorithm>
+#include <climits>
 #include <iostream>
 #include <random>
 #include <vector>
@@ -60,6 +61,10 @@ void line_test() {
 }
 
 void small_test() {
+    
+    int zbuff[100][100] = {INT_MIN};
+    
+    std::cout << zbuff[0][0] << std::endl;
     
 }
 
@@ -141,8 +146,8 @@ void triangle_model_test() {
     
     Model model("tinyrenderer-files/obj/african_head/african_head.obj");
     
-    const int width = 1500;
-    const int height = 1500;
+    const int width = 750;
+    const int height = 750;
     
     TGAImage image(width, height, TGAImage::RGB);
     const TGAColor white(255, 255, 255, 255);
@@ -156,6 +161,18 @@ void triangle_model_test() {
     color_vec.push_back(green);
     color_vec.push_back(blue);
     
+    // initialize z-buffer array
+    int z_buffer[width][height];
+    
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++){
+            z_buffer[i][j] = INT_MIN;
+        }
+    }
+    
+    // light direction vector
+    Vec3f light_vec(0.f, 0.f, -1.f);
+    
     // Initialize RNG seed for random color generator
     srand(time(NULL));
     
@@ -164,15 +181,15 @@ void triangle_model_test() {
         
         Vec2I pts[3];
         
+        Vec3f verts[3];
+        
         for (int j = 0;j < 3; j++) {
-            Vec3f v = model.vert(face[j]);
+            verts[j] = model.vert(face[j]);
 
             /* Scale coordinate to size of image by adding 1(-1:1 -> 0:2) and 
              * multiplying by width/height and dividing by 2*/
-            int x = (v[0] + 1) * width / 2;
-            int y = (v[1] + 1) * height / 2;
-            
-            cout << x << ", " << y << endl;
+            int x = (verts[j][0] + 1) * width / 2;
+            int y = (verts[j][1] + 1) * height / 2;
             
             Vec2I P(x, y);
             pts[j] = P;
@@ -180,7 +197,18 @@ void triangle_model_test() {
 //            line(x0, y0, x1, y1, image, rand_color());
         }
         
-        triangle(pts[0], pts[1], pts[2], image, rand_color());
+        /* need to cross p0p2 x p0p1, not the reverse(p0p1 x p0p2) to get proper
+         * normal, otherwise vector will be reversed*/
+        Vec3f norm = cross(verts[2] - verts[0], verts[1] - verts[0]);
+        norm.normalize();
+        
+        float intensity = norm*light_vec;
+        
+//        triangle(pts[0], pts[1], pts[2], image, rand_color());
+        if (intensity >= 0) {
+            triangle(pts, image, TGAColor(intensity*255, intensity*255, intensity*255, 255));
+        }
+        
     }
     
     // Flip image vertically as it is drawn upside-down
