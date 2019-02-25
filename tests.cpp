@@ -7,9 +7,9 @@
 #include <algorithm>
 #include <cfloat>
 #include <iostream>
-#include <random>
 #include <vector>
 #include "drawing.h"
+#include "geometry.h"
 #include "model.h"
 #include "tgaimage.h"
 #include "tests.h"
@@ -124,11 +124,11 @@ void triangle_test() {
     image.set(999, 1, white);
     image.set(999, 999, white);
     
-    Vec2I A(760, 500);
-    Vec2I B(80, 900);
-    Vec2I C(440, 10);
+    Vec2i A(760, 500);
+    Vec2i B(80, 900);
+    Vec2i C(440, 10);
     
-    Vec2I D(750, 890);
+    Vec2i D(750, 890);
     
     triangle(A, B, C, image, red);
     triangle(A, D, B, image, green);
@@ -142,73 +142,53 @@ void triangle_model_test() {
     
     Model model("tinyrenderer-files/obj/african_head/african_head.obj");
     
-    const int width = 750;
-    const int height = 750;
+    // image dimensions
+    const int width = 2500;
+    const int height = width;
     
     TGAImage image(width, height, TGAImage::RGB);
-    const TGAColor white(255, 255, 255, 255);
-    const TGAColor red(255, 0, 0, 255);
-    const TGAColor green(0, 255, 0, 255);
-    const TGAColor blue(0, 0, 255, 255);
-    
-    vector<TGAColor> color_vec;
-    color_vec.push_back(white);
-    color_vec.push_back(red);
-    color_vec.push_back(green);
-    color_vec.push_back(blue);
     
     // initialize z-buffer array
-    float z_buffer[width][height];
-    
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++){
-            z_buffer[i][j] = FLT_MIN;
-        }
-    }
-    
-    std::cout << z_buffer[400][400] << endl;
+    vector<vector<float>> z_buffer(height, vector<float>(width, -FLT_MAX));
     
     // light direction vector
     Vec3f light_vec(0.f, 0.f, -1.f);
     
-    // Initialize RNG seed for random color generator
-    srand(time(NULL));
-    
+    // loop through all faces of model
     for (int i = 0; i < model.nfaces(); i++) {
         vector<int> face = model.face(i);
         
-        Vec2I pts[3];
+        Vec2i pts[3];
         Vec3f z_vals;
         
         Vec3f verts[3];
         
+        // texture u,v vertices
+        Vec2f tex_uv[3];
+        
         for (int j = 0;j < 3; j++) {
             verts[j] = model.vert(face[j]);
+            tex_uv[j] = model.uv(i, j);
 
             /* Scale coordinate to size of image by adding 1(-1:1 -> 0:2) and 
              * multiplying by width/height and dividing by 2*/
             int x = (verts[j][0] + 1) * width / 2;
             int y = (verts[j][1] + 1) * height / 2;
             
-            Vec2I P(x, y);
+            Vec2i P(x, y);
             pts[j] = P;
             z_vals[j] = verts[j][2];
-
-//            line(x0, y0, x1, y1, image, rand_color());
         }
         
         /* need to cross p0p2 x p0p1, not the reverse(p0p1 x p0p2) to get proper
          * normal, otherwise vector will be reversed*/
-        Vec3f norm = cross(verts[2] - verts[0], verts[1] - verts[0]);
+        Vec3f norm = cross((verts[2] - verts[0]), (verts[1] - verts[0]));
         norm.normalize();
         
-        float intensity = norm*light_vec;
-        
-//        triangle(pts[0], pts[1], pts[2], image, rand_color());
+        // dot product of face normal and light vector to get light intensity
+        float intensity = norm * light_vec;
         if (intensity >= 0) {
-            TGAColor color_intensity(intensity*255, intensity*255, intensity*255, 255);
-//            triangle(pts, image, color_intensity);
-            triangle_z(pts, z_vals, z_buffer, image, color_intensity);
+            triangle_z(pts, z_vals, z_buffer, model, tex_uv, image, intensity);
         }
         
     }

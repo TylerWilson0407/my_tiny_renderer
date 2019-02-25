@@ -9,29 +9,8 @@
 #define	DRAWING_H
 
 #include "geometry.h"
+#include "model.h"
 #include "tgaimage.h"
-
-// data structures
-struct Vec2I {
-    int x = 0;
-    int y = 0;
-    
-    // constructor without parameters (initializes to (0, 0))
-    Vec2I() : x(0), y(0) {};
-    
-    // constructor with parameters
-    Vec2I(int x, int y) : x(x), y(y) {}
-    
-    // add operator overload for adding two points
-    Vec2I operator+(const Vec2I& pnt) const {
-        return Vec2I(x + pnt.x, y + pnt.y);
-    }
-    
-    // subtract operator overload for subtracting two points
-    Vec2I operator-(const Vec2I& pnt) const {
-        return Vec2I(x - pnt.x, y - pnt.y);
-    }
-};
 
 struct BoundingBox {
     int x_lower;
@@ -39,7 +18,7 @@ struct BoundingBox {
     int y_lower;
     int y_upper;
     
-    BoundingBox(Vec2I* points) {
+    BoundingBox(Vec2i* points) {
         
         // initialize bounds to x/y of first point
         x_lower = points[0].x;
@@ -47,7 +26,7 @@ struct BoundingBox {
         y_lower = points[0].y;
         y_upper = points[0].y;
         
-        for (const Vec2I* point = points + 1; point <= points + 2; point++) {
+        for (const Vec2i* point = points + 1; point <= points + 2; point++) {
         
             if (point->x < x_lower) {
                 x_lower = point->x;
@@ -73,9 +52,12 @@ void horiz_line(int x0, int x1, int y, TGAImage &image, TGAColor color);
 void vert_line(int x0, int x1, int y, TGAImage &image, TGAColor color);
 
 // triangle drawing functions
-void triangle(Vec2I p0, Vec2I p1, Vec2I p2, TGAImage &image, TGAColor color);
-void triangle (Vec2I* pts, TGAImage& image, TGAColor color);
-void triangle_z (Vec2I* pts, Vec3f z_vals, float z_buffer[][750], TGAImage& image, TGAColor color);
+void triangle(Vec2i p0, Vec2i p1, Vec2i p2, TGAImage &image, TGAColor color);
+void triangle(Vec2i* pts, TGAImage& image, TGAColor color);
+void triangle_z(Vec2i* pts, \
+        Vec3f z_vals, std::vector<std::vector<float>>& z_buffer, \
+        Model&, Vec2f* tex_uv, \
+        TGAImage& image, float intensity);
 
 #endif	/* DRAWING_H */
 

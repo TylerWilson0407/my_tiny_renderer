@@ -3,13 +3,14 @@
 #include <vector>
 #include "drawing.h"
 #include "geometry.h"
+#include "model.h"
 #include "tgaimage.h"
 
 // structures
 
 // utility functions
 
-int cross2I(const Vec2I& v0, const Vec2I& v1) {
+int cross2I(const Vec2i& v0, const Vec2i& v1) {
     /* Cross product of 2D vectors with integer components.  Resulting vector 
  * points in z-direction.  Vectors represented as Points(vec = 0 -> point) */
     
@@ -23,7 +24,7 @@ int sign(const int& x) {
     return (x >= 0) - (x < 0);
 }
 
-bool inside_triangle(const Vec2I* pts, const Vec2I& P) {
+bool inside_triangle(const Vec2i* pts, const Vec2i& P) {
     /* Returns true if points P is inside triangle of points in pts*/
     
     // pre-compute values that are used multiple times
@@ -50,7 +51,7 @@ bool inside_triangle(const Vec2I* pts, const Vec2I& P) {
     return false;
 }
 
-Vec3f barycentric(const Vec2I* pts, const Vec2I& P) {
+Vec3f barycentric(const Vec2i* pts, const Vec2i& P) {
     /* Returns true if points P is inside triangle of points in pts*/
     
     // pre-compute values that are used multiple times
@@ -90,6 +91,20 @@ float z_interpolate(Vec3f bary, Vec3f z_vals) {
     }
 
     return z;
+}
+
+// merge w/ z_interpolate later as template
+Vec2f uv_interpolate(Vec3f bary, Vec2f* tex_uv) {
+    
+    Vec2f uv;
+    
+    for (int i=0; i<3;i++) {
+        for (int j = 0; j < 2; j++) {
+            uv[j] += bary[i] * tex_uv[i][j];
+        }
+    }
+
+    return uv;
 }
 
 // line drawing functions
@@ -192,10 +207,10 @@ void vert_line(int x, int y0, int y1, TGAImage &image, TGAColor color) {
 }
 
 // triangle drawing functions
-void triangle (Vec2I A, Vec2I B, Vec2I C, TGAImage &image, TGAColor color) {
+void triangle (Vec2i A, Vec2i B, Vec2i C, TGAImage &image, TGAColor color) {
     
     // add points into array
-    Vec2I pts[] = {A, B, C};
+    Vec2i pts[] = {A, B, C};
     
     /* get upper and lower bounds of x and y to create bounding box*/
     // initialize with x/y of point A
@@ -204,7 +219,7 @@ void triangle (Vec2I A, Vec2I B, Vec2I C, TGAImage &image, TGAColor color) {
     
     // loop through B and C looking for lesser/greater values of x/y
     // REWRITE TO LOOP THROUGH {B, C}, looks cleaner!!!
-    for (Vec2I* ptr = pts + 1; ptr <= pts + 2; ptr++) {
+    for (Vec2i* ptr = pts + 1; ptr <= pts + 2; ptr++) {
         
         if (ptr->x < x_bound[0]) {
             x_bound[0] = ptr->x;
@@ -225,7 +240,7 @@ void triangle (Vec2I A, Vec2I B, Vec2I C, TGAImage &image, TGAColor color) {
     for (int x = x_bound[0]; x < x_bound[1]; x++) {
         for (int y = y_bound[0]; y < y_bound[1]; y++) {
             
-            Vec2I P(x, y);
+            Vec2i P(x, y);
             
             if (inside_triangle(pts, P)) {
                 image.set(x, y, color);
@@ -236,14 +251,14 @@ void triangle (Vec2I A, Vec2I B, Vec2I C, TGAImage &image, TGAColor color) {
     return;
 }
 
-void triangle (Vec2I* pts, TGAImage& image, TGAColor color) {
+void triangle (Vec2i* pts, TGAImage& image, TGAColor color) {
 
     BoundingBox bbox(pts);
     
     for (int x = bbox.x_lower; x < bbox.x_upper; x++) {
         for (int y = bbox.y_lower; y < bbox.y_upper; y++) {
             
-            Vec2I P(x, y);
+            Vec2i P(x, y);
             
             if (inside_triangle(pts, P)) {
                 image.set(x, y, color);
@@ -254,14 +269,17 @@ void triangle (Vec2I* pts, TGAImage& image, TGAColor color) {
     return;
 }
 
-void triangle_z (Vec2I* pts, Vec3f z_vals, float z_buffer[][750], TGAImage& image, TGAColor color) {
+void triangle_z (Vec2i* pts, \
+        Vec3f z_vals, std::vector<std::vector<float>>& z_buffer, \
+        Model& model, Vec2f* tex_uv, \
+        TGAImage& image, float intensity) {
 
     BoundingBox bbox(pts);
     
     for (int x = bbox.x_lower; x < bbox.x_upper; x++) {
         for (int y = bbox.y_lower; y < bbox.y_upper; y++) {
             
-            Vec2I P(x, y);
+            Vec2i P(x, y);
             
             Vec3f bc = barycentric(pts, P);
             
@@ -270,7 +288,9 @@ void triangle_z (Vec2I* pts, Vec3f z_vals, float z_buffer[][750], TGAImage& imag
             if (bc[2] >= 0) {
                 if (z > (z_buffer[x][y])) {
                     z_buffer[x][y] = z;
-                    image.set(x, y, color);
+                    Vec2f uv = uv_interpolate(bc, tex_uv);
+                    TGAColor color_uv = model.diffuse(uv);
+                    image.set(x, y, color_uv * intensity);
                 }
             }
         }
