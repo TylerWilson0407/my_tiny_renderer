@@ -18,7 +18,7 @@ struct BoundingBox {
     int y_lower;
     int y_upper;
     
-    BoundingBox(Vec2i* points) {
+    BoundingBox(Vec2i* points, TGAImage& image) {
         
         // initialize bounds to x/y of first point
         x_lower = points[0].x;
@@ -29,21 +29,23 @@ struct BoundingBox {
         for (const Vec2i* point = points + 1; point <= points + 2; point++) {
         
             if (point->x < x_lower) {
-                x_lower = point->x;
+                x_lower = std::max(point->x, 0);
             } else if (point->x > x_upper) {
-                x_upper = point->x;
+                x_upper = std::min(point->x, image.get_width() - 1);
             }
 
             if (point->y < y_lower) {
-                y_lower = point->y;
+                y_lower = std::max(point->y, 0);
             } else if (point->y > y_upper) {
-                y_upper = point->y;
+                y_upper = std::min(point->y, image.get_height() - 1);
         }
     }
     }
 };
 
 // utility functions
+//Vec3f perspective_transform(Vec3f vert, float c);
+void perspective_transform(Vec3f& vert, float c);
 
 // line drawing functions
 void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color);

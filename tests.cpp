@@ -143,8 +143,10 @@ void triangle_model_test() {
     Model model("tinyrenderer-files/obj/african_head/african_head.obj");
     
     // image dimensions
-    const int width = 2500;
+    const int width = 1000;
     const int height = width;
+    
+    float cam_dist = 2;
     
     TGAImage image(width, height, TGAImage::RGB);
     
@@ -168,6 +170,11 @@ void triangle_model_test() {
         
         for (int j = 0;j < 3; j++) {
             verts[j] = model.vert(face[j]);
+            
+            // perspective transform
+//            verts[j] = perspective_transform(verts[j], cam_dist);
+            perspective_transform(verts[j], cam_dist);
+            
             tex_uv[j] = model.uv(i, j);
 
             /* Scale coordinate to size of image by adding 1(-1:1 -> 0:2) and 
@@ -195,7 +202,7 @@ void triangle_model_test() {
     
     // Flip image vertically as it is drawn upside-down
     image.flip_vertically();
-    image.write_tga_file("output/triangle_model_zbuff_test.tga");
+    image.write_tga_file("output/triangle_model_persp_test.tga");
     
     return;
 }

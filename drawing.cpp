@@ -10,15 +10,6 @@
 
 // utility functions
 
-int cross2I(const Vec2i& v0, const Vec2i& v1) {
-    /* Cross product of 2D vectors with integer components.  Resulting vector 
- * points in z-direction.  Vectors represented as Points(vec = 0 -> point) */
-    
-    int k = (v0.x * v1.y) - (v0.y * v1.x);
-    
-    return k;
-}
-
 int sign(const int& x) {
     /* Returns sign of int.  (x>=0) returns 1.  (x<0) returns -1.*/
     return (x >= 0) - (x < 0);
@@ -105,6 +96,34 @@ Vec2f uv_interpolate(Vec3f bary, Vec2f* tex_uv) {
     }
 
     return uv;
+}
+
+//Vec3f perspective_transform(Vec3f vert, float c) {
+//    // perspective transform of vertex with camera at distance c
+//    
+//    Vec3f vert_persp;
+//    float r = 1 - (vert[2] / c);
+//    
+////    std::cout << r << std::endl;
+//    
+//    for (int i = 0; i < 3; i++) {
+//        vert_persp[i] = vert[i] / r;
+//    }
+//    
+//    return vert_persp;
+//}
+
+void perspective_transform(Vec3f& vert, float c) {
+    // perspective transform of vertex with camera at distance c
+    
+    Vec3f vert_persp;
+    float r = 1 - (vert[2] / c);
+    
+//    std::cout << r << std::endl;
+    
+    for (int i = 0; i < 3; i++) {
+        vert[i] = vert[i] / r;
+    }
 }
 
 // line drawing functions
@@ -253,7 +272,7 @@ void triangle (Vec2i A, Vec2i B, Vec2i C, TGAImage &image, TGAColor color) {
 
 void triangle (Vec2i* pts, TGAImage& image, TGAColor color) {
 
-    BoundingBox bbox(pts);
+    BoundingBox bbox(pts, image);
     
     for (int x = bbox.x_lower; x < bbox.x_upper; x++) {
         for (int y = bbox.y_lower; y < bbox.y_upper; y++) {
@@ -274,7 +293,7 @@ void triangle_z (Vec2i* pts, \
         Model& model, Vec2f* tex_uv, \
         TGAImage& image, float intensity) {
 
-    BoundingBox bbox(pts);
+    BoundingBox bbox(pts, image);
     
     for (int x = bbox.x_lower; x < bbox.x_upper; x++) {
         for (int y = bbox.y_lower; y < bbox.y_upper; y++) {
