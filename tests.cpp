@@ -146,7 +146,7 @@ void triangle_model_test() {
     const int width = 1000;
     const int height = width;
     
-    float cam_dist = 2;
+    float cam_dist = 3;
     
     TGAImage image(width, height, TGAImage::RGB);
     

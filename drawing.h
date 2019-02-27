@@ -38,8 +38,13 @@ struct BoundingBox {
                 y_lower = std::max(point->y, 0);
             } else if (point->y > y_upper) {
                 y_upper = std::min(point->y, image.get_height() - 1);
+            }   
         }
-    }
+        
+        x_lower = std::max(x_lower, 0);
+        x_upper = std::min(x_upper, image.get_width() - 1);
+        y_lower = std::max(y_lower, 0);
+        y_upper = std::min(y_upper, image.get_height() - 1);
     }
 };
 
