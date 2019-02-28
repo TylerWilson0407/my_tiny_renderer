@@ -156,6 +156,12 @@ void triangle_model_test() {
     // light direction vector
     Vec3f light_vec(0.f, 0.f, -1.f);
     
+    // view matrix
+    Vec3f to(0, 0, 0);
+    Vec3f from(1, 1, 9);
+    
+    Matrix viewmat = view_matrix(from, to);
+    
     // loop through all faces of model
     for (int i = 0; i < model.nfaces(); i++) {
         vector<int> face = model.face(i);
@@ -170,6 +176,20 @@ void triangle_model_test() {
         
         for (int j = 0;j < 3; j++) {
             verts[j] = model.vert(face[j]);
+            
+            // transform to 4d to multiply by view matrix
+            Vec4f vert4d;
+            for (int i = 0; i < 4; i++) {
+                vert4d[i] = (i == 3) ? 1 : verts[j][i];
+            }
+            
+            vert4d = viewmat * vert4d;
+            
+            for (int i = 0; i < 3; i++) {
+                verts[j][i] = vert4d[i];
+            }
+            
+            
             
             // perspective transform
 //            verts[j] = perspective_transform(verts[j], cam_dist);

@@ -98,21 +98,6 @@ Vec2f uv_interpolate(Vec3f bary, Vec2f* tex_uv) {
     return uv;
 }
 
-//Vec3f perspective_transform(Vec3f vert, float c) {
-//    // perspective transform of vertex with camera at distance c
-//    
-//    Vec3f vert_persp;
-//    float r = 1 - (vert[2] / c);
-//    
-////    std::cout << r << std::endl;
-//    
-//    for (int i = 0; i < 3; i++) {
-//        vert_persp[i] = vert[i] / r;
-//    }
-//    
-//    return vert_persp;
-//}
-
 void perspective_transform(Vec3f& vert, float c) {
     // perspective transform of vertex with camera at distance c
     
@@ -124,6 +109,35 @@ void perspective_transform(Vec3f& vert, float c) {
     for (int i = 0; i < 3; i++) {
         vert[i] = vert[i] / r;
     }
+}
+
+Matrix view_matrix(Vec3f& from, Vec3f& to) {
+    
+    Vec3f forward = from - to;
+    forward.normalize();
+    
+    /* arbitrary temp vector to cross with forward, to get right vector, note
+     that if temp is not a unit vector it must be normalized!!!! */
+    Vec3f temp(0, 1, 0);
+    Vec3f right = cross(temp, forward);
+    
+    // cross forward and right vecs to get up vector
+    Vec3f up = cross(forward, right);
+    
+    Matrix view;
+    
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 3; j++) {
+            switch(i) {
+                case 0: view[i][j] = right[j]; break;
+                case 1: view[i][j] = up[j]; break;
+                case 2: view[i][j] = forward[j]; break;
+                case 3: view[i][j] = from[j]; break;
+            }
+        }
+    }
+    
+    return view;
 }
 
 // line drawing functions

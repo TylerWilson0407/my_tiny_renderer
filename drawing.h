@@ -51,6 +51,7 @@ struct BoundingBox {
 // utility functions
 //Vec3f perspective_transform(Vec3f vert, float c);
 void perspective_transform(Vec3f& vert, float c);
+Matrix view_matrix(Vec3f& from, Vec3f& to);
 
 // line drawing functions
 void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color);
