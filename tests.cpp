@@ -62,6 +62,14 @@ void line_test() {
 
 void small_test() {
     
+    Vec3f testv(1.4, 2.5, 3.5);
+    
+    Matrix mat = Matrix::identity();
+    
+    Vec3f testres = Cartesian(mat * Homogeneous(testv));
+    
+    std::cout << testres << endl;
+    
 }
 
 void wireframe_test() {
@@ -158,9 +166,14 @@ void triangle_model_test() {
     
     // view matrix
     Vec3f to(0, 0, 0);
-    Vec3f from(1, 1, 9);
+    Vec3f from(2, -1, 3);
+    Vec3f up(0, 1, 0);
     
-    Matrix viewmat = view_matrix(from, to);
+    Matrix viewmat = view_matrix(from, to, up);
+    std::cout << viewmat << endl;
+    
+    //create viewing frustum
+    
     
     // loop through all faces of model
     for (int i = 0; i < model.nfaces(); i++) {
@@ -177,23 +190,26 @@ void triangle_model_test() {
         for (int j = 0;j < 3; j++) {
             verts[j] = model.vert(face[j]);
             
-            // transform to 4d to multiply by view matrix
-            Vec4f vert4d;
-            for (int i = 0; i < 4; i++) {
-                vert4d[i] = (i == 3) ? 1 : verts[j][i];
-            }
+//            verts[j] = Cartesian(viewmat * Homogeneous(verts[j]));
             
-            vert4d = viewmat * vert4d;
+            float l = -0.5;
+            float r = -l;
+            float b = l;
+            float t = r;
+            float n = 1;
+            float f = 5;
+
+            float we = 1;
+
+            Matrix persp = perspective_matrix(l, r, b, t, n, f);
             
-            for (int i = 0; i < 3; i++) {
-                verts[j][i] = vert4d[i];
-            }
+//            verts[j] = perspective_transform(persp, verts[j]);
             
+            Matrix view = viewport_matrix(0, width, 0, height);
             
+            verts[j] = Cartesian(persp * viewmat * Homogeneous(verts[j]));
             
             // perspective transform
-//            verts[j] = perspective_transform(verts[j], cam_dist);
-            perspective_transform(verts[j], cam_dist);
             
             tex_uv[j] = model.uv(i, j);
 

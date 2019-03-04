@@ -48,10 +48,46 @@ struct BoundingBox {
     }
 };
 
+template <typename T> struct vec<4,T> {
+    vec() : x(T()), y(T()), z(T()), w(T()) {}
+    vec(T X, T Y, T Z) : x(X), y(Y), z(Z), w(1.f) {}
+    vec(vec<3, T> V) : x(V.x), y(V.y), z(V.z), w(1.f) {}
+    template <class U> vec<4,T>(const vec<4,U> &v);
+          T& operator[](const size_t i) { 
+              assert(i<4);
+              return i<=0 ? x : (1==i ? y : (2==i ? z : w));
+          }
+    const T& operator[](const size_t i) const {
+        assert(i<4);
+        return i<=0 ? x : (1==i ? y : (2==i ? z : w));
+    }
+
+    T x,y,z,w;
+};
+
+struct Homogeneous : public Vec4f
+{
+    explicit Homogeneous(const Vec3f& v) : Vec4f() {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        w = 1.f;
+    };
+};
+
+struct Cartesian : public Vec3f
+{
+    explicit Cartesian(const Vec4f& v) : Vec3f() {
+        x = v.x / v.w;
+        y = v.y / v.w;
+        z = v.z / v.w;
+    }
+};
+
 // utility functions
-//Vec3f perspective_transform(Vec3f vert, float c);
-void perspective_transform(Vec3f& vert, float c);
-Matrix view_matrix(Vec3f& from, Vec3f& to);
+Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up);
+Matrix perspective_matrix(float l, float r, float b, float t, float n, float f);
+Matrix viewport_matrix(int l, int r, int b, int t);
 
 // line drawing functions
 void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color);
@@ -65,6 +101,10 @@ void triangle(Vec2i* pts, TGAImage& image, TGAColor color);
 void triangle_z(Vec2i* pts, \
         Vec3f z_vals, std::vector<std::vector<float>>& z_buffer, \
         Model&, Vec2f* tex_uv, \
+        TGAImage& image, float intensity);
+void triangle_mat (Vec3f* pts, \
+        std::vector<std::vector<float>>& z_buffer, \
+        Model& model, Vec2f* tex_uv, \
         TGAImage& image, float intensity);
 
 #endif	/* DRAWING_H */
