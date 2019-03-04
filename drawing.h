@@ -8,43 +8,44 @@
 #ifndef DRAWING_H
 #define	DRAWING_H
 
+#include <cfloat>
 #include "geometry.h"
 #include "model.h"
 #include "tgaimage.h"
 
 struct BoundingBox {
-    int x_lower;
-    int x_upper;
-    int y_lower;
-    int y_upper;
+    float x_lower;
+    float x_upper;
+    float y_lower;
+    float y_upper;
     
-    BoundingBox(Vec2i* points, TGAImage& image) {
+    BoundingBox(Vec3f* points, TGAImage& image) {
         
         // initialize bounds to x/y of first point
-        x_lower = points[0].x;
+        x_lower = FLT_MAX;
         x_upper = points[0].x;
         y_lower = points[0].y;
         y_upper = points[0].y;
         
-        for (const Vec2i* point = points + 1; point <= points + 2; point++) {
+        for (const Vec3f* point = points; point <= points + 2; point++) {
         
             if (point->x < x_lower) {
-                x_lower = std::max(point->x, 0);
+                x_lower = std::max(point->x, 0.f);
             } else if (point->x > x_upper) {
-                x_upper = std::min(point->x, image.get_width() - 1);
+                x_upper = std::min(point->x, image.get_width() - 1.f);
             }
 
             if (point->y < y_lower) {
-                y_lower = std::max(point->y, 0);
+                y_lower = std::max(point->y, 0.f);
             } else if (point->y > y_upper) {
-                y_upper = std::min(point->y, image.get_height() - 1);
+                y_upper = std::min(point->y, image.get_height() - 1.f);
             }   
         }
         
-        x_lower = std::max(x_lower, 0);
-        x_upper = std::min(x_upper, image.get_width() - 1);
-        y_lower = std::max(y_lower, 0);
-        y_upper = std::min(y_upper, image.get_height() - 1);
+        x_lower = std::max(x_lower, 0.f);
+        x_upper = std::min(x_upper, image.get_width() - 1.f);
+        y_lower = std::max(y_lower, 0.f);
+        y_upper = std::min(y_upper, image.get_height() - 1.f);
     }
 };
 
@@ -84,9 +85,9 @@ struct Cartesian : public Vec3f
     }
 };
 
-// utility functions
+// matrices
 Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up);
-Matrix perspective_matrix(float l, float r, float b, float t, float n, float f);
+Matrix perspective_matrix(float fov_x, float fov_y, float n, float f);
 Matrix viewport_matrix(int l, int r, int b, int t);
 
 // line drawing functions
@@ -103,6 +104,10 @@ void triangle_z(Vec2i* pts, \
         Model&, Vec2f* tex_uv, \
         TGAImage& image, float intensity);
 void triangle_mat (Vec3f* pts, \
+        std::vector<std::vector<float>>& z_buffer, \
+        Model& model, Vec2f* tex_uv, \
+        TGAImage& image, float intensity);
+void triangle_fp (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, Vec2f* tex_uv, \
         TGAImage& image, float intensity);

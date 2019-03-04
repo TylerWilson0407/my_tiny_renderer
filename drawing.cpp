@@ -1,4 +1,6 @@
+#define _USE_MATH_DEFINES
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <vector>
 #include "drawing.h"
@@ -73,15 +75,46 @@ Vec3f barycentric(const Vec2i* pts, const Vec2i& P) {
     return Vec3f(-1, -1, -1);
 }
 
+Vec3f barycentric_fp(const Vec3f* pts, const Vec2f& P) {
+    /* Returns true if points P is inside triangle of points in pts*/
+    
+    // pre-compute values that are used multiple times
+    float y1_y2 = pts[1].y - pts[2].y;
+    float x2_x1 = pts[2].x - pts[1].x;
+    float x0_x2 = pts[0].x - pts[2].x;
+    float y0_y2 = pts[0].y - pts[2].y;
+    float y2_y0 = pts[2].y - pts[0].y;
+    
+    float inv_det = 1.f / ((y1_y2 * x0_x2) + (x2_x1 * y0_y2));
+    
+    Vec3f lambda;
+    
+    /* Since any negative barycentric coordinate rejects the point, we can check
+     if the point is positive after each calculation, and skip the remaining
+     calculations if it is negative. */
+    lambda[0] = ((y1_y2 * (P.x - pts[2].x)) + (x2_x1 * (P.y - pts[2].y))) * inv_det;
+    if (lambda[0] >= 0) {
+        lambda[1]  = ((y2_y0 * (P.x - pts[2].x)) + (x0_x2 * (P.y - pts[2].y))) * inv_det ;
+        if (lambda[1] >= 0) {
+            lambda[2] = 1.f - lambda[1] - lambda[0];
+            if (lambda[2] >= 0) {
+                return lambda;
+            }   
+        }
+    }
+    
+    return Vec3f(-1, -1, -1);
+}
+
 // expand this function to interpolate any types
-float z_interpolate(Vec3f bary, Vec3f z_vals) {
+float z_interpolate(Vec3f bary, Vec3f* pts) {
     
 //    return (bary * z_vals);
     
     float z;
     
     for (int i=0; i<3;i++) {
-        z += bary[i] * z_vals[i];
+        z += bary[i] * pts[i][2];
     }
 
     return z;
@@ -121,7 +154,8 @@ Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up) {
 }
 
 // change parameters later to accept structure
-Matrix perspective_matrix(float l, float r, float b, float t, float n, float f) {
+
+Matrix perspective_matrix(float fov_x, float fov_y, float n, float f) {
     /* Maps 3D points from eye coordinates(viewing frustum) to normalized device
      coordinates (NDC space). This matrix uses reversed-Z convention, mapping to
      zero on the far clipping plane and positive 1 on the near clipping plane, 
@@ -132,6 +166,11 @@ Matrix perspective_matrix(float l, float r, float b, float t, float n, float f) 
      https://developer.nvidia.com/content/depth-precision-visualized
      * 
      */
+    
+    float l = -n * std::tan((fov_x / 2) * (180 / M_PI));
+    float r = -l;
+    float b = -n * std::tan((fov_y / 2) * (180 / M_PI));
+    float t = -b;
     
     Matrix perspective_matrix;
     
@@ -272,90 +311,29 @@ void vert_line(int x, int y0, int y1, TGAImage &image, TGAColor color) {
 }
 
 // triangle drawing functions
-void triangle (Vec2i A, Vec2i B, Vec2i C, TGAImage &image, TGAColor color) {
-    
-    // add points into array
-    Vec2i pts[] = {A, B, C};
-    
-    /* get upper and lower bounds of x and y to create bounding box*/
-    // initialize with x/y of point A
-    int x_bound[] = {A.x, A.x};
-    int y_bound[] = {A.y, A.y};
-    
-    // loop through B and C looking for lesser/greater values of x/y
-    // REWRITE TO LOOP THROUGH {B, C}, looks cleaner!!!
-    for (Vec2i* ptr = pts + 1; ptr <= pts + 2; ptr++) {
-        
-        if (ptr->x < x_bound[0]) {
-            x_bound[0] = ptr->x;
-        } else if (ptr->x > x_bound[1]) {
-            x_bound[1] = ptr->x;
-        }
-        
-        if (ptr->y < y_bound[0]) {
-            y_bound[0] = ptr->y;
-        } else if (ptr->y > y_bound[1]) {
-            y_bound[1] = ptr->y;
-        }
-    }
-    
-    std::cout << x_bound[0] << ", " << x_bound[1] << std::endl;
-    std::cout << y_bound[0] << ", " << y_bound[1] << std::endl;
-    
-    for (int x = x_bound[0]; x < x_bound[1]; x++) {
-        for (int y = y_bound[0]; y < y_bound[1]; y++) {
-            
-            Vec2i P(x, y);
-            
-            if (inside_triangle(pts, P)) {
-                image.set(x, y, color);
-            }
-        }
-    }
-    
-    return;
-}
 
-void triangle (Vec2i* pts, TGAImage& image, TGAColor color) {
-
-    BoundingBox bbox(pts, image);
-    
-    for (int x = bbox.x_lower; x < bbox.x_upper; x++) {
-        for (int y = bbox.y_lower; y < bbox.y_upper; y++) {
-            
-            Vec2i P(x, y);
-            
-            if (inside_triangle(pts, P)) {
-                image.set(x, y, color);
-            }
-        }
-    }
-    
-    return;
-}
-
-void triangle_z (Vec2i* pts, \
-        Vec3f z_vals, std::vector<std::vector<float>>& z_buffer, \
+void triangle_fp (Vec3f* pts, \
+        std::vector<std::vector<float>>& z_buffer, \
         Model& model, Vec2f* tex_uv, \
         TGAImage& image, float intensity) {
 
     BoundingBox bbox(pts, image);
     
-    for (int x = bbox.x_lower; x < bbox.x_upper; x++) {
-        for (int y = bbox.y_lower; y < bbox.y_upper; y++) {
+    Vec2i P;
+    
+    for (P.x = bbox.x_lower; P.x < bbox.x_upper; P.x++) {
+        for (P.y = bbox.y_lower; P.y < bbox.y_upper; P.y++) {
             
-            Vec2i P(x, y);
+            Vec3f bc = barycentric_fp(pts, P);
             
-            Vec3f bc = barycentric(pts, P);
-            
-            float z = z_interpolate(bc, z_vals);
+            float z = z_interpolate(bc, pts);
             
             if (bc[2] >= 0) {
-                if (z > (z_buffer[x][y])) {
-                    z_buffer[x][y] = z;
+                if (z > (z_buffer[P.x][P.y])) {
+                    z_buffer[P.x][P.y] = z;
                     Vec2f uv = uv_interpolate(bc, tex_uv);
                     TGAColor color_uv = model.diffuse(uv);
-                    image.set(x, y, color_uv * intensity);
+                    image.set(P.x, P.y, color_uv * intensity);
                 }
             }
         }

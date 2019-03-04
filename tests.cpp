@@ -118,43 +118,44 @@ void wireframe_test() {
     
     return;
 }
-
-void triangle_test() {
-    
-    TGAImage image(1000, 1000, TGAImage::RGB);
-    const TGAColor white(255, 255, 255, 255);
-    const TGAColor red(255, 0, 0, 255);
-    const TGAColor green(0, 255, 0, 255);
-    const TGAColor blue(0, 0, 255, 255);
-    
-    image.set(1, 1, white);
-    image.set(1, 999, white);
-    image.set(999, 1, white);
-    image.set(999, 999, white);
-    
-    Vec2i A(760, 500);
-    Vec2i B(80, 900);
-    Vec2i C(440, 10);
-    
-    Vec2i D(750, 890);
-    
-    triangle(A, B, C, image, red);
-    triangle(A, D, B, image, green);
-    
-    image.write_tga_file("output/triangle_test.tga");
-    
-    return;
-}
+//
+//void triangle_test() {
+//    
+//    TGAImage image(1000, 1000, TGAImage::RGB);
+//    const TGAColor white(255, 255, 255, 255);
+//    const TGAColor red(255, 0, 0, 255);
+//    const TGAColor green(0, 255, 0, 255);
+//    const TGAColor blue(0, 0, 255, 255);
+//    
+//    image.set(1, 1, white);
+//    image.set(1, 999, white);
+//    image.set(999, 1, white);
+//    image.set(999, 999, white);
+//    
+//    Vec2i A(760, 500);
+//    Vec2i B(80, 900);
+//    Vec2i C(440, 10);
+//    
+//    Vec2i D(750, 890);
+//    
+//    triangle(A, B, C, image, red);
+//    triangle(A, D, B, image, green);
+//    
+//    image.write_tga_file("output/triangle_test.tga");
+//    
+//    return;
+//}
 
 void triangle_model_test() {
     
     Model model("tinyrenderer-files/obj/african_head/african_head.obj");
     
     // image dimensions
-    const int width = 1000;
-    const int height = width;
     
-    float cam_dist = 3;
+    float asp_ratio = 1; //aspect ratio
+    
+    const int width = 1000;
+    const int height = width / asp_ratio;
     
     TGAImage image(width, height, TGAImage::RGB);
     
@@ -166,13 +167,21 @@ void triangle_model_test() {
     
     // view matrix
     Vec3f to(0, 0, 0);
-    Vec3f from(2, -1, 3);
+    Vec3f from(0, 0, 3);
     Vec3f up(0, 1, 0);
     
     Matrix viewmat = view_matrix(from, to, up);
-    std::cout << viewmat << endl;
     
-    //create viewing frustum
+    // perspective matrix
+    float fov_x = 60; //degrees
+    float fov_y = fov_x / asp_ratio;
+    float n = .5;
+    float f = 6;
+    
+    Matrix persp = perspective_matrix(fov_x, fov_y, n, f);
+    
+    // viewport matrix
+    Matrix viewport = viewport_matrix(0, width, 0, height);
     
     
     // loop through all faces of model
@@ -183,55 +192,35 @@ void triangle_model_test() {
         Vec3f z_vals;
         
         Vec3f verts[3];
+        Vec3f verts_world[3];
         
         // texture u,v vertices
         Vec2f tex_uv[3];
         
         for (int j = 0;j < 3; j++) {
-            verts[j] = model.vert(face[j]);
+            verts_world[j] = model.vert(face[j]);
             
-//            verts[j] = Cartesian(viewmat * Homogeneous(verts[j]));
+            verts_world[j] = Cartesian(viewmat * Homogeneous(verts_world[j]));
             
-            float l = -0.5;
-            float r = -l;
-            float b = l;
-            float t = r;
-            float n = 1;
-            float f = 5;
-
-            float we = 1;
-
-            Matrix persp = perspective_matrix(l, r, b, t, n, f);
-            
-//            verts[j] = perspective_transform(persp, verts[j]);
-            
-            Matrix view = viewport_matrix(0, width, 0, height);
-            
-            verts[j] = Cartesian(persp * viewmat * Homogeneous(verts[j]));
-            
-            // perspective transform
+            verts[j] = Cartesian(viewport * persp * Homogeneous(verts_world[j]));
             
             tex_uv[j] = model.uv(i, j);
-
-            /* Scale coordinate to size of image by adding 1(-1:1 -> 0:2) and 
-             * multiplying by width/height and dividing by 2*/
-            int x = (verts[j][0] + 1) * width / 2;
-            int y = (verts[j][1] + 1) * height / 2;
-            
-            Vec2i P(x, y);
-            pts[j] = P;
-            z_vals[j] = verts[j][2];
         }
         
         /* need to cross p0p2 x p0p1, not the reverse(p0p1 x p0p2) to get proper
          * normal, otherwise vector will be reversed*/
-        Vec3f norm = cross((verts[2] - verts[0]), (verts[1] - verts[0]));
+        Vec3f norm = cross((verts_world[2] - verts_world[0]), (verts_world[1] - verts_world[0]));
         norm.normalize();
         
         // dot product of face normal and light vector to get light intensity
         float intensity = norm * light_vec;
+        
+        if (i%100==0) {
+            cout << norm << endl;
+        }
+        
         if (intensity >= 0) {
-            triangle_z(pts, z_vals, z_buffer, model, tex_uv, image, intensity);
+            triangle_fp(verts, z_buffer, model, tex_uv, image, intensity);
         }
         
     }
