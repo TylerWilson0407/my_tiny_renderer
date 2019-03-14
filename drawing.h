@@ -9,6 +9,7 @@
 #define	DRAWING_H
 
 #include <cfloat>
+#include <iostream>
 #include "geometry.h"
 #include "model.h"
 #include "tgaimage.h"
@@ -23,21 +24,22 @@ struct BoundingBox {
         
         // initialize bounds to x/y of first point
         x_lower = FLT_MAX;
-        x_upper = points[0].x;
-        y_lower = points[0].y;
-        y_upper = points[0].y;
+        x_upper = -FLT_MAX;
+        y_lower = FLT_MAX;
+        y_upper = -FLT_MAX;
         
-        for (const Vec3f* point = points; point <= points + 2; point++) {
+        for (const Vec3f* point = points; point < points + 3; point++) {
         
             if (point->x < x_lower) {
                 x_lower = std::max(point->x, 0.f);
-            } else if (point->x > x_upper) {
+            }
+            if (point->x > x_upper) {
                 x_upper = std::min(point->x, image.get_width() - 1.f);
             }
-
             if (point->y < y_lower) {
                 y_lower = std::max(point->y, 0.f);
-            } else if (point->y > y_upper) {
+            }
+            if (point->y > y_upper) {
                 y_upper = std::min(point->y, image.get_height() - 1.f);
             }   
         }
@@ -68,11 +70,11 @@ template <typename T> struct vec<4,T> {
 
 struct Homogeneous : public Vec4f
 {
-    explicit Homogeneous(const Vec3f& v) : Vec4f() {
+    explicit Homogeneous(const Vec3f& v, float vw=1) : Vec4f() {
         x = v.x;
         y = v.y;
         z = v.z;
-        w = 1.f;
+        w = vw;
     };
 };
 
@@ -84,6 +86,30 @@ struct Cartesian : public Vec3f
         z = v.z / v.w;
     }
 };
+
+// interpolate template
+template <class T>
+T interpolate(Vec3f bary, T* vert_vals) {
+    
+    T result;
+    
+    for (int i = 0; i < 3; i++) {
+        result = result + vert_vals[i] * bary[i];
+    }
+    
+    return result;
+}
+
+inline TGAColor operator+(const TGAColor& c1, const TGAColor& c2) {
+    
+    TGAColor result(0, 0, 0, 0);
+    
+    for (int i = 0; i < 4; i++) {
+        result.bgra[i] = c1.bgra[i] + c2.bgra[i];
+    }
+    
+    return result;
+}
 
 // matrices
 Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up);
@@ -107,10 +133,24 @@ void triangle_mat (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, Vec2f* tex_uv, \
         TGAImage& image, float intensity);
-void triangle_fp (Vec3f* pts, \
+void triangle (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
-        Model& model, Vec2f* tex_uv, \
+        Model& model, const int& i_face, \
         TGAImage& image, float intensity);
+void triangle_gouraud (Vec3f* pts, \
+        std::vector<std::vector<float>>& z_buffer, \
+        Model& model, const int& i_face, \
+        TGAImage& image, const Vec3f& light_vec);
+void triangle_phong (Vec3f* pts, \
+        std::vector<std::vector<float>>& z_buffer, \
+        Model& model, const int& i_face, \
+        TGAImage& image, const Vec3f& light_vec, \
+        Matrix& viewmat);
+void triangle_normalmap (Vec3f* pts, \
+        std::vector<std::vector<float>>& z_buffer, \
+        Model& model, const int& i_face, \
+        TGAImage& image, const Vec3f& light_vec, \
+        Matrix& viewmat);
 
 #endif	/* DRAWING_H */
 

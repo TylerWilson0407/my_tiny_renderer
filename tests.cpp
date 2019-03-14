@@ -62,14 +62,15 @@ void line_test() {
 
 void small_test() {
     
-    Vec3f testv(1.4, 2.5, 3.5);
+    float x = 60;
+    float y = 59.9;
     
-    Matrix mat = Matrix::identity();
+    float l = -3 * std::tan((x / 2.f) * (M_PI / 180));
+    float b = -3 * std::tan((y / 2.f) * (M_PI / 180));
     
-    Vec3f testres = Cartesian(mat * Homogeneous(testv));
-    
-    std::cout << testres << endl;
-    
+    std::cout << "l: " << l << "\n";
+    std::cout << "b: " << b << "\n";
+   
 }
 
 void wireframe_test() {
@@ -118,33 +119,6 @@ void wireframe_test() {
     
     return;
 }
-//
-//void triangle_test() {
-//    
-//    TGAImage image(1000, 1000, TGAImage::RGB);
-//    const TGAColor white(255, 255, 255, 255);
-//    const TGAColor red(255, 0, 0, 255);
-//    const TGAColor green(0, 255, 0, 255);
-//    const TGAColor blue(0, 0, 255, 255);
-//    
-//    image.set(1, 1, white);
-//    image.set(1, 999, white);
-//    image.set(999, 1, white);
-//    image.set(999, 999, white);
-//    
-//    Vec2i A(760, 500);
-//    Vec2i B(80, 900);
-//    Vec2i C(440, 10);
-//    
-//    Vec2i D(750, 890);
-//    
-//    triangle(A, B, C, image, red);
-//    triangle(A, D, B, image, green);
-//    
-//    image.write_tga_file("output/triangle_test.tga");
-//    
-//    return;
-//}
 
 void triangle_model_test() {
     
@@ -152,30 +126,36 @@ void triangle_model_test() {
     
     // image dimensions
     
-    float asp_ratio = 1; //aspect ratio
+    float asp_ratio = 1.77; //aspect ratio
     
-    const int width = 1000;
+    const int width = 2000;
     const int height = width / asp_ratio;
     
     TGAImage image(width, height, TGAImage::RGB);
     
     // initialize z-buffer array
-    vector<vector<float>> z_buffer(height, vector<float>(width, -FLT_MAX));
+    vector<vector<float>> z_buffer(width, vector<float>(height, FLT_MAX));
     
-    // light direction vector
-    Vec3f light_vec(0.f, 0.f, -1.f);
+    /* light direction vector is negative of direction light is actually coming
+     from*/
+    Vec3f light_vec(0, 0, 1);
+    light_vec.normalize();
     
     // view matrix
-    Vec3f to(0, 0, 0);
-    Vec3f from(0, 0, 3);
-    Vec3f up(0, 1, 0);
+    Vec3f to(0.f, 0.f, 0.f);
+    Vec3f from(2.f, 1.f, 5.f);
+    Vec3f up(0.f, 1.f, 0.f);
     
     Matrix viewmat = view_matrix(from, to, up);
+    
+    // view direction vector for back face culling
+    // should not change since it is in camera reference frame, which doesn't change
+    Vec3f view_vec(0.f, 0.f, 1.f);
     
     // perspective matrix
     float fov_x = 60; //degrees
     float fov_y = fov_x / asp_ratio;
-    float n = .5;
+    float n = 3;
     float f = 6;
     
     Matrix persp = perspective_matrix(fov_x, fov_y, n, f);
@@ -183,51 +163,61 @@ void triangle_model_test() {
     // viewport matrix
     Matrix viewport = viewport_matrix(0, width, 0, height);
     
+    // transform light vector
+    light_vec = proj<3>(viewmat * embed<4>(light_vec, 0.f));
     
     // loop through all faces of model
     for (int i = 0; i < model.nfaces(); i++) {
+//    for (int i = 2392; i < 2393; i++) {
         vector<int> face = model.face(i);
         
-        Vec2i pts[3];
-        Vec3f z_vals;
+//        Vec2i pts[3];
         
         Vec3f verts[3];
         Vec3f verts_world[3];
         
         // texture u,v vertices
         Vec2f tex_uv[3];
+        Vec3f norm_uv[3];
+        
+        //REMOVE
+        Vec3f normies[3];
         
         for (int j = 0;j < 3; j++) {
             verts_world[j] = model.vert(face[j]);
+            normies[j] = model.normal(i, j);
             
-            verts_world[j] = Cartesian(viewmat * Homogeneous(verts_world[j]));
+            verts_world[j] = Cartesian((viewmat * embed<4>(verts_world[j])));
             
-            verts[j] = Cartesian(viewport * persp * Homogeneous(verts_world[j]));
+            verts[j] = Cartesian(viewport * persp * embed<4>(verts_world[j]));
             
             tex_uv[j] = model.uv(i, j);
+            
+            norm_uv[j] = model.normal(i, j);
         }
         
-        /* need to cross p0p2 x p0p1, not the reverse(p0p1 x p0p2) to get proper
-         * normal, otherwise vector will be reversed*/
-        Vec3f norm = cross((verts_world[2] - verts_world[0]), (verts_world[1] - verts_world[0]));
+        Vec3f norm = cross((verts_world[1] - verts_world[0]), (verts_world[2] - verts_world[0]));
         norm.normalize();
         
         // dot product of face normal and light vector to get light intensity
         float intensity = norm * light_vec;
         
-        if (i%100==0) {
-            cout << norm << endl;
-        }
+        // back face culling value, needs to be positive or triangle is discarded
+        float cull = norm * view_vec;
         
-        if (intensity >= 0) {
-            triangle_fp(verts, z_buffer, model, tex_uv, image, intensity);
+        if (cull >= 0) {
+//            triangle(verts, z_buffer, model, i, image, intensity);
+//            triangle_gouraud(verts, z_buffer, model, i, image, light_vec);
+//            triangle_phong(verts, z_buffer, model, i, image, light_vec, viewmat);
+            triangle_normalmap(verts, z_buffer, model, i, image, light_vec, viewmat);
         }
         
     }
     
     // Flip image vertically as it is drawn upside-down
     image.flip_vertically();
-    image.write_tga_file("output/triangle_model_persp_test.tga");
+    
+    image.write_tga_file("output/normal_mapping.tga");
     
     return;
 }
