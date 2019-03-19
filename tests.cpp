@@ -62,15 +62,8 @@ void line_test() {
 
 void small_test() {
     
-    float x = 60;
-    float y = 59.9;
     
-    float l = -3 * std::tan((x / 2.f) * (M_PI / 180));
-    float b = -3 * std::tan((y / 2.f) * (M_PI / 180));
     
-    std::cout << "l: " << l << "\n";
-    std::cout << "b: " << b << "\n";
-   
 }
 
 void wireframe_test() {
@@ -208,8 +201,7 @@ void triangle_model_test() {
         if (cull >= 0) {
 //            triangle(verts, z_buffer, model, i, image, intensity);
 //            triangle_gouraud(verts, z_buffer, model, i, image, light_vec);
-//            triangle_phong(verts, z_buffer, model, i, image, light_vec, viewmat);
-            triangle_normalmap(verts, z_buffer, model, i, image, light_vec, viewmat);
+            triangle_phong(verts, z_buffer, model, i, image, light_vec, viewmat);
         }
         
     }
@@ -217,7 +209,7 @@ void triangle_model_test() {
     // Flip image vertically as it is drawn upside-down
     image.flip_vertically();
     
-    image.write_tga_file("output/normal_mapping.tga");
+    image.write_tga_file("output/normal_mapping_ts.tga");
     
     return;
 }

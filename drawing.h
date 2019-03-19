@@ -14,6 +14,8 @@
 #include "model.h"
 #include "tgaimage.h"
 
+Vec3f barycentric(const Vec3f* pts, const Vec2f& P);
+
 struct BoundingBox {
     float x_lower;
     float x_upper;
@@ -142,11 +144,6 @@ void triangle_gouraud (Vec3f* pts, \
         Model& model, const int& i_face, \
         TGAImage& image, const Vec3f& light_vec);
 void triangle_phong (Vec3f* pts, \
-        std::vector<std::vector<float>>& z_buffer, \
-        Model& model, const int& i_face, \
-        TGAImage& image, const Vec3f& light_vec, \
-        Matrix& viewmat);
-void triangle_normalmap (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, const int& i_face, \
         TGAImage& image, const Vec3f& light_vec, \
