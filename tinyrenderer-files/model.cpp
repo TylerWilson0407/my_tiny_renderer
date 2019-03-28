@@ -3,7 +3,8 @@
 #include <sstream>
 #include "model.h"
 
-Model::Model(const char *filename) : verts_(), faces_(), norms_(), uv_(), diffusemap_(), normalmap_(), specularmap_() {
+Model::Model(const char *filename) : verts_(), faces_(), norms_(), uv_(), \
+        tans_(), bitans_(), diffusemap_(), normalmap_(), specularmap_() {
     std::ifstream in;
     in.open (filename, std::ifstream::in);
     if (in.fail()) return;
@@ -38,6 +39,54 @@ Model::Model(const char *filename) : verts_(), faces_(), norms_(), uv_(), diffus
             faces_.push_back(f);
         }
     }
+    
+    ////////////////////
+    /* Added computation of vertex tangent and bitangent vectors for more 
+     * accurate normal mapping.
+     * -TylerW
+     */
+    
+    // array of vectors of faces shared by each vertex
+    std::vector<int> shared_faces[nverts()];
+    
+    // area of each face(for weighted averaging of tangents)
+    float face_areas[nfaces()];
+    
+    // tangents of each face
+    mat<2, 3, float> face_tangents[nfaces()];
+    
+    for (int i = 0; i < nfaces(); i++) {
+        
+        std::vector<int> current_face = face(i);
+        
+        for (int j = 0; j < 3; j++) {
+            int vertex = current_face[j];
+            shared_faces[vertex].push_back(i);
+        }
+        
+        face_areas[i] = get_face_area(i);
+        face_tangents[i] = get_face_tangents(i);
+    }
+    
+    for (int i = 0; i < nverts(); i++) {
+        
+       std::vector<int> faces = shared_faces[i];
+       Vec3f vert_tan;
+       Vec3f vert_bitan;
+        
+       std::vector<int>::iterator itr;
+        for (itr = faces.begin(); itr != faces.end(); ++itr) {
+            vert_tan = vert_tan + face_tangents[*itr][0] * face_areas[*itr];
+            vert_bitan = vert_bitan + face_tangents[*itr][1] * face_areas[*itr];
+            
+        }
+       
+       tans_.push_back(vert_tan.normalize());
+       bitans_.push_back(vert_bitan.normalize());
+    }
+    
+    ////////////////////
+    
     std::cerr << "# v# " << verts_.size() << " f# "  << faces_.size() << " vt# " << uv_.size() << " vn# " << norms_.size() << std::endl;
     load_texture(filename, "_diffuse.tga", diffusemap_);
     load_texture(filename, "_nm_tangent.tga",      normalmap_);
@@ -78,6 +127,47 @@ void Model::load_texture(std::string filename, const char *suffix, TGAImage &img
     }
 }
 
+////////////////////
+/* Private functions used for getting per-vertex tangent/bitangent vectors.
+ * -TylerW
+ */
+
+float Model::get_face_area(int i_face) {
+    Vec3f AB = vert(i_face, 1) - vert(i_face, 0);
+    Vec3f AC = vert(i_face, 2) - vert(i_face, 0);
+    return (0.5 * cross(AB, AC).norm());
+}
+
+mat<2, 3, float> Model::get_face_tangents(int i_face) {
+    /* Computes tangent space basis based on method found here:
+     * Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary Mesh”. 
+     * Terathon Software, 2001. http://terathon.com/code/tangent.html
+     */
+    
+    Vec3f Q1 = vert(i_face, 1) - vert(i_face, 0);
+    Vec3f Q2 = vert(i_face, 2) - vert(i_face, 0);
+    
+    Vec2f s1t1 = uv(i_face, 1) - uv(i_face, 0);
+    Vec2f s2t2 = uv(i_face, 2) - uv(i_face, 0);
+    
+    mat<2, 3, float> Q;
+    Q[0] = Q1;
+    Q[1] = Q2;
+    
+    mat<2, 2, float> st;
+    st[0] = s1t1;
+    st[1] = s2t2;
+    
+    mat<2, 3, float> TB;
+    TB = st.invert() * Q;
+    TB[0].normalize();
+    TB[1].normalize();
+    
+    return TB;
+}
+
+////////////////////
+
 TGAColor Model::diffuse(Vec2f uvf) {
     Vec2i uv(uvf[0]*diffusemap_.get_width(), uvf[1]*diffusemap_.get_height());
     return diffusemap_.get(uv[0], uv[1]);
@@ -106,3 +196,19 @@ Vec3f Model::normal(int iface, int nthvert) {
     return norms_[idx].normalize();
 }
 
+////////////////////
+/* Public functions for fetching tangent & bitangent vectors.
+ * -TylerW
+ */
+
+Vec3f Model::tangent(int iface, int nthvert) {
+    int idx = faces_[iface][nthvert][2];
+    return tans_[idx].normalize();
+}
+
+Vec3f Model::bitangent(int iface, int nthvert) {
+    int idx = faces_[iface][nthvert][2];
+    return bitans_[idx].normalize();
+}
+
+////////////////////

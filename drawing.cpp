@@ -8,10 +8,6 @@
 #include "model.h"
 #include "tgaimage.h"
 
-// structures
-
-// utility functions
-
 Vec3f barycentric(const Vec3f* pts, const Vec2f& P) {
     /* Returns true if points P is inside triangle of points in pts*/
     
@@ -120,41 +116,24 @@ Matrix viewport_matrix(int l, int r, int b, int t) {
     return viewport_matrix;
 }
 
-// line drawing functions
-void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
-    /* Given two coordinates (x0, y0) and (x1, y1), draws a line of given color
-     on the input image. Note that the bresenham_line function can handle 
-     horizontal and vertical lines, however they have been given their own 
-     functions for optimization purposes.*/
-    
-    if (x0 == x1) {
-        vert_line(x0, y0, y1, image, color);
-    } else if (y0 == y1) {
-        horiz_line(x0, x1, y1, image, color);
-    } else {
-        bresenham_line(x0, y0, x1, y1, image, color);
-    }
-    return;
-}
-
-void bresenham_line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
+void line(Vec2i p0, Vec2i p1, TGAImage &image, TGAColor color) {
     
     // set steep bool if slope > 1 and swap x/y if so
-    bool steep = (std::abs(y1 - y0) > std::abs(x1 - x0)) ? true : false;
+    bool steep = (std::abs(p1.y - p0.y) > std::abs(p1.x - p0.x)) ? true : false;
     if (steep) {
-        std::swap(x0, y0);
-        std::swap(x1, y1);
+        std::swap(p0.x, p0.y);
+        std::swap(p1.x, p1.y);
     }
     
     // swap points if x0 > x1
-    if (x0 > x1) {
-        std::swap(x0, x1);
-        std::swap(y0, y1);
+    if (p0.x > p1.x) {
+        std::swap(p0.x, p1.x);
+        std::swap(p0.y, p1.y);
     }
     
-    const int dx = x1 - x0;
-    int dy = y1 - y0;
-    int y = y0;
+    const int dx = p1.x - p0.x;
+    int dy = p1.y - p0.y;
+    int y = p0.y;
     int yincr = 1;
     int err = 0;
     
@@ -168,7 +147,7 @@ void bresenham_line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor co
      * since we swapped x/y if steep.
      */
     if (!steep) {
-        for (int x = x0; x <= x1; x++) {
+        for (int x = p0.x; x <= p1.x; x++) {
 
             image.set(x, y, color);
 
@@ -181,7 +160,7 @@ void bresenham_line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor co
 
         }
     } else {
-        for (int x = x0; x <= x1; x++) {
+        for (int x = p0.x; x <= p1.x; x++) {
 
             image.set(y, x, color);
 
@@ -197,29 +176,12 @@ void bresenham_line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor co
     return;
 }
 
-void horiz_line(int x0, int x1, int y, TGAImage &image, TGAColor color) {
-    if (x0 > x1) {
-        std::swap(x0, x1);
-    }
-    
-    for (int x = x0; x <= x1; x++) {
-        image.set(x, y, color);
-    }
-    return;
+void line(Vec3f p0, Vec3f p1, TGAImage &image, TGAColor color) {
+    Vec2i p0_2i(p0.x, p0.y);
+    Vec2i p1_2i(p1.x, p1.y);
+    line(p0_2i, p1_2i, image, color);
 }
 
-void vert_line(int x, int y0, int y1, TGAImage &image, TGAColor color) {
-    if (y0 > y1) {
-        std::swap(y0, y1);
-    }
-    
-    for (int y = y0; y <= y1; y++) {
-        image.set(x, y, color);
-    }
-    return;
-}
-
-// triangle drawing functions
 void triangle (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, const int& i_face, \
@@ -258,7 +220,7 @@ void triangle_gouraud (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, const int& i_face, \
         TGAImage& image, const Vec3f& light_vec, \
-        const Matrix& viewmat, const Matrix& persp) {
+        Matrix& viewmat) {
     
     Vec2f uv_diff[3];
     Vec3f normals[3];
@@ -268,6 +230,8 @@ void triangle_gouraud (Vec3f* pts, \
     for (int j = 0;j < 3; j++) {
             uv_diff[j] = model.uv(i_face, j);
             normals[j] = model.normal(i_face, j);
+            
+            normals[j] = proj<3>(viewmat.invert_transpose() * embed<4>(normals[j], 0.f));
             
             float intensity = normals[j] * light_vec;
             
@@ -296,7 +260,7 @@ void triangle_gouraud (Vec3f* pts, \
     return;
 }
 
-void triangle_phong (Vec3f* pts, \
+void triangle_phong (Vec3f* verts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, const int& i_face, \
         TGAImage& image, const Vec3f& light_vec, \
@@ -311,6 +275,54 @@ void triangle_phong (Vec3f* pts, \
             normals[j] = proj<3>(viewmat.invert_transpose() * embed<4>(normals[j], 0.f));
         }
 
+    BoundingBox bbox(verts, image);
+    
+    Vec2i P;
+    
+    for (P.x = bbox.x_lower; P.x < bbox.x_upper; P.x++) {
+        for (P.y = bbox.y_lower; P.y < bbox.y_upper; P.y++) {
+            
+            Vec3f bc = barycentric(verts, P);
+            
+            Vec3f xyz = interpolate(bc, verts);
+            
+            if ((bc[2] >= 0) && (xyz[2] < (z_buffer[P.x][P.y]))) {
+                z_buffer[P.x][P.y] = xyz[2];
+                Vec3f normal = interpolate(bc, normals);
+                float intensity = std::max(0.f, normal * light_vec);
+                Vec2f uv_diff = interpolate(bc, uv_diffs);
+                TGAColor pix_color = model.diffuse(uv_diff) * intensity;
+                image.set(P.x, P.y, pix_color);
+            }
+        }
+    }
+    
+    return;
+}
+
+void triangle_darboux (Vec3f* pts, \
+        std::vector<std::vector<float>>& z_buffer, \
+        Model& model, const int& i_face, \
+        TGAImage& image, const Vec3f& light_vec, \
+        Matrix& viewmat) {
+    
+    Vec2f uvs[3];
+    Vec3f normals[3];
+    Vec3f tans[3];
+    Vec3f bitans[3];
+    
+    for (int j = 0;j < 3; j++) {
+            uvs[j] = model.uv(i_face, j);
+            normals[j] = model.normal(i_face, j);
+            normals[j] = proj<3>(viewmat.invert_transpose() * embed<4>(normals[j], 0.f));
+            
+            tans[j] = model.tangent(i_face, j);
+            tans[j] = proj<3>(viewmat * embed<4>(tans[j], 0.f));
+            
+            bitans[j] = model.bitangent(i_face, j);
+            bitans[j] = proj<3>(viewmat * embed<4>(bitans[j], 0.f));
+        }
+
     BoundingBox bbox(pts, image);
     
     Vec2i P;
@@ -319,15 +331,26 @@ void triangle_phong (Vec3f* pts, \
         for (P.y = bbox.y_lower; P.y < bbox.y_upper; P.y++) {
             
             Vec3f bc = barycentric(pts, P);
-            
             Vec3f xyz = interpolate(bc, pts);
             
             if ((bc[2] >= 0) && (xyz[2] < (z_buffer[P.x][P.y]))) {
                 z_buffer[P.x][P.y] = xyz[2];
                 Vec3f normal = interpolate(bc, normals);
                 float intensity = std::max(0.f, normal * light_vec);
-                Vec2f uv_diff = interpolate(bc, uv_diffs);
-                TGAColor pix_color = model.diffuse(uv_diff) * intensity;
+                Vec2f uv = interpolate(bc, uvs);
+                Vec3f norm_ts = model.normal(uv);
+                Vec3f tangent_vec = interpolate(bc, tans);
+                Vec3f bitangent_vec = interpolate(bc, bitans);
+                
+                Vec3f darboux_normal;
+                
+                darboux_normal = tangent_vec * norm_ts[0] + \
+                        bitangent_vec * norm_ts[1] + \
+                        normal * norm_ts[2];
+                
+                intensity = std::max(0.f, darboux_normal * light_vec);
+                
+                TGAColor pix_color = model.diffuse(uv) * intensity;
                 image.set(P.x, P.y, pix_color);
             }
         }

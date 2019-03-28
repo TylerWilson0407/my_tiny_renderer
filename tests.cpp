@@ -42,18 +42,18 @@ void line_test() {
     const TGAColor green(0, 255, 0, 255);
     const TGAColor blue(0, 0, 255, 255);
     
-    line(50, 50, 90, 70, image, red); // base case
-    line(50, 50, 70, 90, image, blue); // steep
-    line(50, 50, 10, 30, image, green); // x0 > x1
-    line(50, 50, 90, 30, image, red); // negative slope
-    line(50, 50, 30, 10, image, green); // x0 > x1, steep
-    line(50, 50, 10, 70, image, red); // x0 > x1, negative
-    line(50, 50, 30, 90, image, white); // x0 > x1, negative, steep
-    line(50, 50, 70, 10, image, white); // negative, steep
-    line(50, 50, 90, 50, image, green); // horizontal line
-    line(50, 50, 50, 90, image, green); //vertical line
-    line(60, 90, 60, 90, image, blue); //single point
-    line(90, 90, 110, 150, image, white); //point outside image
+    line(Vec2i(50, 50), Vec2i(90, 70), image, red); // base case
+    line(Vec2i(50, 50), Vec2i(70, 90), image, blue); // steep
+    line(Vec2i(50, 50), Vec2i(10, 30), image, green); // x0 > x1
+    line(Vec2i(50, 50), Vec2i(90, 30), image, red); // negative slope
+    line(Vec2i(50, 50), Vec2i(30, 10), image, green); // x0 > x1, steep
+    line(Vec2i(50, 50), Vec2i(10, 70), image, red); // x0 > x1, negative
+    line(Vec2i(50, 50), Vec2i(30, 90), image, white); // x0 > x1, negative, steep
+    line(Vec2i(50, 50), Vec2i(70, 10), image, white); // negative, steep
+    line(Vec2i(50, 50), Vec2i(90, 50), image, green); // horizontal line
+    line(Vec2i(50, 50), Vec2i(50, 90), image, green); //vertical line
+    line(Vec2i(60, 90), Vec2i(60, 90), image, blue); //single point
+    line(Vec2i(90, 90), Vec2i(110, 150), image, white); //point outside image
     
     image.write_tga_file("output/line_test.tga");
     
@@ -102,7 +102,7 @@ void wireframe_test() {
             int x1 = (v1[0] + 1) * width / 2;
             int y1 = (v1[1] + 1) * height / 2;
 //            line(x0, y0, x1, y1, image, color_vec[(i % 4)]);
-            line(x0, y0, x1, y1, image, rand_color());
+            line(Vec2i(x0, y0), Vec2i(x1, y1), image, rand_color());
         }
     }
     
@@ -118,7 +118,6 @@ void triangle_model_test() {
     Model model("tinyrenderer-files/obj/african_head/african_head.obj");
     
     // image dimensions
-    
     float asp_ratio = 1.77; //aspect ratio
     
     const int width = 2000;
@@ -136,7 +135,7 @@ void triangle_model_test() {
     
     // view matrix
     Vec3f to(0.f, 0.f, 0.f);
-    Vec3f from(2.f, 1.f, 5.f);
+    Vec3f from(5.f, 3.f, 5.f);
     Vec3f up(0.f, 1.f, 0.f);
     
     Matrix viewmat = view_matrix(from, to, up);
@@ -161,32 +160,16 @@ void triangle_model_test() {
     
     // loop through all faces of model
     for (int i = 0; i < model.nfaces(); i++) {
-//    for (int i = 2392; i < 2393; i++) {
         vector<int> face = model.face(i);
-        
-//        Vec2i pts[3];
         
         Vec3f verts[3];
         Vec3f verts_world[3];
         
-        // texture u,v vertices
-        Vec2f tex_uv[3];
-        Vec3f norm_uv[3];
-        
-        //REMOVE
-        Vec3f normies[3];
-        
         for (int j = 0;j < 3; j++) {
             verts_world[j] = model.vert(face[j]);
-            normies[j] = model.normal(i, j);
-            
             verts_world[j] = Cartesian((viewmat * embed<4>(verts_world[j])));
             
             verts[j] = Cartesian(viewport * persp * embed<4>(verts_world[j]));
-            
-            tex_uv[j] = model.uv(i, j);
-            
-            norm_uv[j] = model.normal(i, j);
         }
         
         Vec3f norm = cross((verts_world[1] - verts_world[0]), (verts_world[2] - verts_world[0]));
@@ -195,13 +178,11 @@ void triangle_model_test() {
         // dot product of face normal and light vector to get light intensity
         float intensity = norm * light_vec;
         
-        // back face culling value, needs to be positive or triangle is discarded
-        float cull = norm * view_vec;
-        
-        if (cull >= 0) {
+        if ((norm * view_vec) >= 0) {
 //            triangle(verts, z_buffer, model, i, image, intensity);
-//            triangle_gouraud(verts, z_buffer, model, i, image, light_vec);
-            triangle_phong(verts, z_buffer, model, i, image, light_vec, viewmat);
+//            triangle_gouraud(verts, z_buffer, model, i, image, light_vec, viewmat);
+//            triangle_phong(verts, z_buffer, model, i, image, light_vec, viewmat);
+            triangle_darboux(verts, z_buffer, model, i, image, light_vec, viewmat);
         }
         
     }

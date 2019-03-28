@@ -119,10 +119,8 @@ Matrix perspective_matrix(float fov_x, float fov_y, float n, float f);
 Matrix viewport_matrix(int l, int r, int b, int t);
 
 // line drawing functions
-void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color);
-void bresenham_line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color);
-void horiz_line(int x0, int x1, int y, TGAImage &image, TGAColor color);
-void vert_line(int x0, int x1, int y, TGAImage &image, TGAColor color);
+void line(Vec2i p0, Vec2i p1, TGAImage &image, TGAColor color);
+void line(Vec3f p0, Vec3f p1, TGAImage &image, TGAColor color);
 
 // triangle drawing functions
 void triangle(Vec2i p0, Vec2i p1, Vec2i p2, TGAImage &image, TGAColor color);
@@ -142,8 +140,14 @@ void triangle (Vec3f* pts, \
 void triangle_gouraud (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, const int& i_face, \
-        TGAImage& image, const Vec3f& light_vec);
+        TGAImage& image, const Vec3f& light_vec, \
+        Matrix& viewmat);
 void triangle_phong (Vec3f* pts, \
+        std::vector<std::vector<float>>& z_buffer, \
+        Model& model, const int& i_face, \
+        TGAImage& image, const Vec3f& light_vec, \
+        Matrix& viewmat);
+void triangle_darboux (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, const int& i_face, \
         TGAImage& image, const Vec3f& light_vec, \
