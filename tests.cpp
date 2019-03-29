@@ -178,7 +178,7 @@ void triangle_model_test() {
         // dot product of face normal and light vector to get light intensity
         float intensity = norm * light_vec;
         
-        if ((norm * view_vec) >= 0) {
+        if ((norm * view_vec) > 0) {
 //            triangle(verts, z_buffer, model, i, image, intensity);
 //            triangle_gouraud(verts, z_buffer, model, i, image, light_vec, viewmat);
 //            triangle_phong(verts, z_buffer, model, i, image, light_vec, viewmat);

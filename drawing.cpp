@@ -12,11 +12,10 @@ Vec3f barycentric(const Vec3f* pts, const Vec2f& P) {
     /* Returns true if points P is inside triangle of points in pts*/
     
     // pre-compute values that are used multiple times
-    float y1_y2 = pts[1].y - pts[2].y;
-    float x2_x1 = pts[2].x - pts[1].x;
     float x0_x2 = pts[0].x - pts[2].x;
+    float x2_x1 = pts[2].x - pts[1].x;
     float y0_y2 = pts[0].y - pts[2].y;
-    float y2_y0 = pts[2].y - pts[0].y;
+    float y1_y2 = pts[1].y - pts[2].y;
     
     float inv_det = 1.f / ((y1_y2 * x0_x2) + (x2_x1 * y0_y2));
     
@@ -27,7 +26,7 @@ Vec3f barycentric(const Vec3f* pts, const Vec2f& P) {
      calculations if it is negative. */
     lambda[0] = ((y1_y2 * (P.x - pts[2].x)) + (x2_x1 * (P.y - pts[2].y))) * inv_det;
     if (lambda[0] >= 0) {
-        lambda[1]  = ((y2_y0 * (P.x - pts[2].x)) + (x0_x2 * (P.y - pts[2].y))) * inv_det ;
+        lambda[1]  = ((-y0_y2 * (P.x - pts[2].x)) + (x0_x2 * (P.y - pts[2].y))) * inv_det ;
         if (lambda[1] >= 0) {
             lambda[2] = 1.f - lambda[1] - lambda[0];
             if (lambda[2] >= 0) {
