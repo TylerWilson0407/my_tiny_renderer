@@ -101,7 +101,7 @@ Matrix perspective_matrix(float fov_x, float fov_y, float n, float f) {
     return perspective_matrix;
 }
 
-Matrix viewport_matrix(int l, int r, int b, int t) {
+Matrix viewport(int l, int r, int b, int t) {
     
     Matrix viewport_matrix = Matrix::identity();
     
@@ -181,7 +181,7 @@ void line(Vec3f p0, Vec3f p1, TGAImage &image, TGAColor color) {
     line(p0_2i, p1_2i, image, color);
 }
 
-void triangle (Vec3f* pts, \
+void triangle_flat (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, const int& i_face, \
         TGAImage& image, float intensity) {

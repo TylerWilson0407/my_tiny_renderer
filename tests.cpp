@@ -68,7 +68,7 @@ void small_test() {
 
 void wireframe_test() {
     
-    Model model("tinyrenderer-files/obj/african_head/african_head.obj");
+    Model model("tinyrenderer-files/obj/african_head/african_head.obj", Matrix::identity());
     
     const int width = 700;
     const int height = 700;
@@ -115,13 +115,18 @@ void wireframe_test() {
 
 void triangle_model_test() {
     
-    Model model("tinyrenderer-files/obj/african_head/african_head.obj");
+    Matrix o2w = Matrix::identity();
+    Vec3f o2w_trans(0, 0, 1);
+    o2w.set_col(3, o2w_trans);
+    
+//    Model model("tinyrenderer-files/obj/african_head/african_head.obj", Matrix::identity());
+    Model model("tinyrenderer-files/obj/african_head/african_head.obj", o2w);
     
     // image dimensions
     float asp_ratio = 1.77; //aspect ratio
     
-    const int width = 2000;
-    const int height = width / asp_ratio;
+    int width = 2000;
+    int height = width / asp_ratio;
     
     TGAImage image(width, height, TGAImage::RGB);
     
@@ -147,13 +152,13 @@ void triangle_model_test() {
     // perspective matrix
     float fov_x = 60; //degrees
     float fov_y = fov_x / asp_ratio;
-    float n = 3;
+    float n = 1;
     float f = 6;
     
     Matrix persp = perspective_matrix(fov_x, fov_y, n, f);
     
     // viewport matrix
-    Matrix viewport = viewport_matrix(0, width, 0, height);
+    Matrix viewport_mat = viewport(0, width, 0, height);
     
     // transform light vector
     light_vec = proj<3>(viewmat * embed<4>(light_vec, 0.f));
@@ -169,7 +174,7 @@ void triangle_model_test() {
             verts_world[j] = model.vert(face[j]);
             verts_world[j] = Cartesian((viewmat * embed<4>(verts_world[j])));
             
-            verts[j] = Cartesian(viewport * persp * embed<4>(verts_world[j]));
+            verts[j] = Cartesian(viewport_mat * persp * embed<4>(verts_world[j]));
         }
         
         Vec3f norm = cross((verts_world[1] - verts_world[0]), (verts_world[2] - verts_world[0]));
@@ -179,7 +184,7 @@ void triangle_model_test() {
         float intensity = norm * light_vec;
         
         if ((norm * view_vec) > 0) {
-//            triangle(verts, z_buffer, model, i, image, intensity);
+//            triangle_flat(verts, z_buffer, model, i, image, intensity);
 //            triangle_gouraud(verts, z_buffer, model, i, image, light_vec, viewmat);
 //            triangle_phong(verts, z_buffer, model, i, image, light_vec, viewmat);
             triangle_darboux(verts, z_buffer, model, i, image, light_vec, viewmat);
@@ -190,7 +195,11 @@ void triangle_model_test() {
     // Flip image vertically as it is drawn upside-down
     image.flip_vertically();
     
-    image.write_tga_file("output/normal_mapping_ts.tga");
+    image.write_tga_file("output/object_world_transform.tga");
     
     return;
+}
+
+void shader_test() {
+    
 }

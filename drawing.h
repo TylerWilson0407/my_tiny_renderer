@@ -70,15 +70,15 @@ template <typename T> struct vec<4,T> {
     T x,y,z,w;
 };
 
-struct Homogeneous : public Vec4f
-{
-    explicit Homogeneous(const Vec3f& v, float vw=1) : Vec4f() {
-        x = v.x;
-        y = v.y;
-        z = v.z;
-        w = vw;
-    };
-};
+//struct Homogeneous : public Vec4f
+//{
+//    explicit Homogeneous(const Vec3f& v, float vw=1) : Vec4f() {
+//        x = v.x;
+//        y = v.y;
+//        z = v.z;
+//        w = vw;
+//    };
+//};
 
 struct Cartesian : public Vec3f
 {
@@ -116,7 +116,7 @@ inline TGAColor operator+(const TGAColor& c1, const TGAColor& c2) {
 // matrices
 Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up);
 Matrix perspective_matrix(float fov_x, float fov_y, float n, float f);
-Matrix viewport_matrix(int l, int r, int b, int t);
+Matrix viewport(int l, int r, int b, int t);
 
 // line drawing functions
 void line(Vec2i p0, Vec2i p1, TGAImage &image, TGAColor color);
@@ -133,7 +133,7 @@ void triangle_mat (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, Vec2f* tex_uv, \
         TGAImage& image, float intensity);
-void triangle (Vec3f* pts, \
+void triangle_flat (Vec3f* pts, \
         std::vector<std::vector<float>>& z_buffer, \
         Model& model, const int& i_face, \
         TGAImage& image, float intensity);

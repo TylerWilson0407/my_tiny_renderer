@@ -20,7 +20,8 @@ private:
     float get_face_area(int i_face);
     mat<2, 3, float> get_face_tangents(int i_face);
 public:
-    Model(const char *filename);
+//    Model(const char *filename);
+    Model(const char *filename, Matrix object2world);
     ~Model();
     int nverts();
     int nfaces();

@@ -3,7 +3,7 @@
 #include <sstream>
 #include "model.h"
 
-Model::Model(const char *filename) : verts_(), faces_(), norms_(), uv_(), \
+Model::Model(const char *filename, Matrix object2world) : verts_(), faces_(), norms_(), uv_(), \
         tans_(), bitans_(), diffusemap_(), normalmap_(), specularmap_() {
     std::ifstream in;
     in.open (filename, std::ifstream::in);
@@ -41,6 +41,13 @@ Model::Model(const char *filename) : verts_(), faces_(), norms_(), uv_(), \
     }
     
     ////////////////////
+    // Transform all vertices into world space
+    
+    for (int i = 0; i < nverts(); i++) {
+        Vec4f ws_vert = object2world * embed<4>(verts_[i]);
+        verts_[i] = proj<3>(ws_vert / ws_vert[3]);
+    }
+    
     /* Added computation of vertex tangent and bitangent vectors for more 
      * accurate normal mapping.
      * -TylerW

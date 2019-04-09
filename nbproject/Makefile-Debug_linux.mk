@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/drawing.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/shader.o \
 	${OBJECTDIR}/tests.o \
 	${OBJECTDIR}/tinyrenderer-files/geometry.o \
 	${OBJECTDIR}/tinyrenderer-files/model.o \
@@ -76,6 +77,11 @@ ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/shader.o: shader.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/shader.o shader.cpp
 
 ${OBJECTDIR}/tests.o: tests.cpp
 	${MKDIR} -p ${OBJECTDIR}
