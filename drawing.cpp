@@ -9,7 +9,9 @@
 #include "tgaimage.h"
 
 Vec3f barycentric(const Vec3f* pts, const Vec2f& P) {
-    /* Returns true if points P is inside triangle of points in pts*/
+    /* Returns barycentric coordinates if point P is inside triangle of points 
+     * in pts.  Otherwise returns negative values(which are rejected by shader.
+     */
     
     // pre-compute values that are used multiple times
     float x0_x2 = pts[0].x - pts[2].x;

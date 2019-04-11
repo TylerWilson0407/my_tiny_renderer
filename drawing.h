@@ -45,11 +45,6 @@ struct BoundingBox {
                 y_upper = std::min(point->y, image.get_height() - 1.f);
             }   
         }
-        
-        x_lower = std::max(x_lower, 0.f);
-        x_upper = std::min(x_upper, image.get_width() - 1.f);
-        y_lower = std::max(y_lower, 0.f);
-        y_upper = std::min(y_upper, image.get_height() - 1.f);
     }
 };
 
@@ -70,26 +65,34 @@ template <typename T> struct vec<4,T> {
     T x,y,z,w;
 };
 
-//struct Homogeneous : public Vec4f
-//{
-//    explicit Homogeneous(const Vec3f& v, float vw=1) : Vec4f() {
-//        x = v.x;
-//        y = v.y;
-//        z = v.z;
-//        w = vw;
-//    };
-//};
+// function to transform a vector by any number of matrices
+template<typename Vec3f, typename... Matrices>
+Vec3f transform_vertex(Vec3f vertex, Matrices&... matrices) {
+    Vec4f vert_homog = embed<4>(vertex);
+    vert_homog =  matr_mult(vert_homog, matrices...);
+    return proj<3>(vert_homog / vert_homog[3]);
+}
 
-struct Cartesian : public Vec3f
-{
-    explicit Cartesian(const Vec4f& v) : Vec3f() {
-        x = v.x / v.w;
-        y = v.y / v.w;
-        z = v.z / v.w;
-    }
-};
+template<typename Vec3f, typename... Matrices>
+Vec3f transform_vector(Vec3f vertex, Matrices&... matrices) {
+    Vec4f vert_homog = embed<4>(vertex, 0.f);
+    vert_homog =  matr_mult(vert_homog, matrices...);
+    return proj<3>(vert_homog);
+}
 
-// interpolate template
+// base case for recursive matr_mult function
+template<typename Vec4f>
+Vec4f matr_mult(Vec4f& vector) {
+    return proj<3>(vector / vector[3]);
+}
+
+// recursive matr_mult function
+template<typename Vec4f, typename Matrix, typename... Matrices>
+Vec4f matr_mult(Vec4f& vector, Matrix& matrix, Matrices&... matrices) {
+    vector = matrix * vector;
+    return matr_mult(vector, matrices...);
+}
+
 template <class T>
 T interpolate(Vec3f bary, T* vert_vals) {
     

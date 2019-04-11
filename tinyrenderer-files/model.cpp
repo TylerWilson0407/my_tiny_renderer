@@ -3,8 +3,9 @@
 #include <sstream>
 #include "model.h"
 
-Model::Model(const char *filename, Matrix object2world) : verts_(), faces_(), norms_(), uv_(), \
-        tans_(), bitans_(), diffusemap_(), normalmap_(), specularmap_() {
+Model::Model(const char *filename, Matrix object2world) : verts_(), faces_(), \
+        norms_(), uv_(), tans_(), bitans_(), diffusemap_(), normalmap_(), \
+        specularmap_() {
     std::ifstream in;
     in.open (filename, std::ifstream::in);
     if (in.fail()) return;
@@ -40,26 +41,17 @@ Model::Model(const char *filename, Matrix object2world) : verts_(), faces_(), no
         }
     }
     
-    ////////////////////
-    // Transform all vertices into world space
+    //////////////////// Added by TylerW
     
+    // Transform all vertices into world space
     for (int i = 0; i < nverts(); i++) {
         Vec4f ws_vert = object2world * embed<4>(verts_[i]);
         verts_[i] = proj<3>(ws_vert / ws_vert[3]);
     }
     
-    /* Added computation of vertex tangent and bitangent vectors for more 
-     * accurate normal mapping.
-     * -TylerW
-     */
-    
-    // array of vectors of faces shared by each vertex
+    // Compute tangent/bitangent vectors at each vertex
     std::vector<int> shared_faces[nverts()];
-    
-    // area of each face(for weighted averaging of tangents)
     float face_areas[nfaces()];
-    
-    // tangents of each face
     mat<2, 3, float> face_tangents[nfaces()];
     
     for (int i = 0; i < nfaces(); i++) {
@@ -92,7 +84,7 @@ Model::Model(const char *filename, Matrix object2world) : verts_(), faces_(), no
        bitans_.push_back(vert_bitan.normalize());
     }
     
-    ////////////////////
+    //////////////////// end Added section
     
     std::cerr << "# v# " << verts_.size() << " f# "  << faces_.size() << " vt# " << uv_.size() << " vn# " << norms_.size() << std::endl;
     load_texture(filename, "_diffuse.tga", diffusemap_);
@@ -134,10 +126,8 @@ void Model::load_texture(std::string filename, const char *suffix, TGAImage &img
     }
 }
 
-////////////////////
-/* Private functions used for getting per-vertex tangent/bitangent vectors.
- * -TylerW
- */
+//////////////////// Added by TylerW
+// Functions used in tangent/bitangent calculations
 
 float Model::get_face_area(int i_face) {
     Vec3f AB = vert(i_face, 1) - vert(i_face, 0);
@@ -147,8 +137,8 @@ float Model::get_face_area(int i_face) {
 
 mat<2, 3, float> Model::get_face_tangents(int i_face) {
     /* Computes tangent space basis based on method found here:
-     * Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary Mesh”. 
-     * Terathon Software, 2001. http://terathon.com/code/tangent.html
+     * Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary 
+     * Mesh”. Terathon Software, 2001. http://terathon.com/code/tangent.html
      */
     
     Vec3f Q1 = vert(i_face, 1) - vert(i_face, 0);
@@ -173,7 +163,7 @@ mat<2, 3, float> Model::get_face_tangents(int i_face) {
     return TB;
 }
 
-////////////////////
+//////////////////// end Added section
 
 TGAColor Model::diffuse(Vec2f uvf) {
     Vec2i uv(uvf[0]*diffusemap_.get_width(), uvf[1]*diffusemap_.get_height());
@@ -203,10 +193,8 @@ Vec3f Model::normal(int iface, int nthvert) {
     return norms_[idx].normalize();
 }
 
-////////////////////
-/* Public functions for fetching tangent & bitangent vectors.
- * -TylerW
- */
+//////////////////// Added by TylerW
+// Getter methods for tangent/bitangent
 
 Vec3f Model::tangent(int iface, int nthvert) {
     int idx = faces_[iface][nthvert][2];
@@ -218,4 +206,4 @@ Vec3f Model::bitangent(int iface, int nthvert) {
     return bitans_[idx].normalize();
 }
 
-////////////////////
+//////////////////// end Added section

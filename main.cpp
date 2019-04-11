@@ -21,7 +21,8 @@ int main(int argc, char** argv) {
 //    triangle_test();
     
 //    small_test();
-    triangle_model_test();
+//    triangle_model_test();
+    shader_test();
     
     return 0;
 }
