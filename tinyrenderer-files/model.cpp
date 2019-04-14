@@ -3,7 +3,7 @@
 #include <sstream>
 #include "model.h"
 
-Model::Model(const char *filename, Matrix object2world) : verts_(), faces_(), \
+Model::Model(const char *filename) : verts_(), faces_(), \
         norms_(), uv_(), tans_(), bitans_(), diffusemap_(), normalmap_(), \
         specularmap_() {
     std::ifstream in;
@@ -39,14 +39,6 @@ Model::Model(const char *filename, Matrix object2world) : verts_(), faces_(), \
             }
             faces_.push_back(f);
         }
-    }
-    
-    //////////////////// Added by TylerW
-    
-    // Transform all vertices into world space
-    for (int i = 0; i < nverts(); i++) {
-        Vec4f ws_vert = object2world * embed<4>(verts_[i]);
-        verts_[i] = proj<3>(ws_vert / ws_vert[3]);
     }
     
     // Compute tangent/bitangent vectors at each vertex
@@ -204,6 +196,23 @@ Vec3f Model::tangent(int iface, int nthvert) {
 Vec3f Model::bitangent(int iface, int nthvert) {
     int idx = faces_[iface][nthvert][2];
     return bitans_[idx].normalize();
+}
+
+// Getter methods for getting vertex properties by vertex index
+Vec3f Model::normal(int i) {
+    return norms_[i];
+}
+
+Vec3f Model::tangent(int i) {
+    return tans_[i];
+}
+
+Vec3f Model::bitangent(int i) {
+    return bitans_[i];
+}
+
+Vec2f Model::uv(int i) {
+    return uv_[i];
 }
 
 //////////////////// end Added section

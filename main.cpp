@@ -20,9 +20,9 @@ int main(int argc, char** argv) {
 //    wireframe_test();
 //    triangle_test();
     
-//    small_test();
+    small_test();
 //    triangle_model_test();
-    shader_test();
+//    shader_test();
     
     return 0;
 }

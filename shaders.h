@@ -37,9 +37,10 @@ public:
     void vertex(Model& model, int face_i, int vert_j);
     void world2clip_vert(Vec3f vert);
     void world2clip_vec(Vec3f vec);
-    void triangle(Vec3f light_vec, \
+    void rasterize(Vec3f light_vec, \
         std::vector<std::vector<float>>& z_buffer, \
         TGAImage image);
+    void fragment(Vec3f bc, TGAImage& image);
 };
 
 #endif /* SHADERS_H */

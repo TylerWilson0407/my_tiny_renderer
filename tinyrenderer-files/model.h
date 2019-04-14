@@ -20,17 +20,21 @@ private:
     float get_face_area(int i_face);
     mat<2, 3, float> get_face_tangents(int i_face);
 public:
-    Model(const char *filename, Matrix object2world);
+    Model(const char *filename);
     ~Model();
     int nverts();
     int nfaces();
+    Vec3f vert(int iface, int nthvert);
     Vec3f normal(int iface, int nthvert);
     Vec3f tangent(int iface, int nthvert);
     Vec3f bitangent(int iface, int nthvert);
+    Vec2f uv(int iface, int nthvert);
     Vec3f normal(Vec2f uv);
     Vec3f vert(int i);
-    Vec3f vert(int iface, int nthvert);
-    Vec2f uv(int iface, int nthvert);
+    Vec3f normal(int i);
+    Vec3f tangent(int i);
+    Vec3f bitangent(int i);
+    Vec2f uv(int i);
     TGAColor diffuse(Vec2f uv);
     float specular(Vec2f uv);
     std::vector<int> face(int idx);

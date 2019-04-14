@@ -33,6 +33,16 @@ void Shader::view(Vec3f& from, Vec3f& to, Vec3f& up) {
 }
 
 void Shader::projection(float fov_x, float fov_y, float n, float f) {
+    /* Maps 3D points from eye coordinates(viewing frustum) to normalized device
+     coordinates (NDC space). This matrix uses reversed-Z convention, mapping to
+     zero on the far clipping plane and positive 1 on the near clipping plane, 
+     to take advantage of increased floating-point precision near zero to 
+     attempt to cancel out the decreased depth value distribution as Z moves 
+     away from the near plane.  See this blog post:
+     * 
+     https://developer.nvidia.com/content/depth-precision-visualized
+     * 
+     */
 
     float l = -n * std::tan((fov_x / 2) * (M_PI / 180));
     float r = -l;
@@ -69,21 +79,22 @@ void Shader::viewport(int l, int r, int b, int t) {
 
 }
 
-void Shader::vertex(Model& model, int face_i, int vert_j) {
-    ndc[vert_j] = transform_vertex(model.vert(face_i, vert_j), mat_view, mat_proj);
-    screen[vert_j] = transform_vertex(ndc[vert_j], mat_viewport);
+//void Shader::vertex(Model& model, int face_i, int vert_j) {
+//    ndc[vert_j] = transform_vertex(model.vert(face_i, vert_j), mat_view, mat_proj);
+//    
+//    screen[vert_j] = transform_vertex(ndc[vert_j], mat_viewport);
+//
+//    // normals must be transformed by inverse-transpose of matrices
+//    norm[vert_j] = transform_vector(model.normal(face_i, vert_j), mat_view_it, mat_proj_it);
+//
+//    tan[vert_j] = transform_vector(model.tangent(face_i, vert_j), mat_view, mat_proj);
+//    bitan[vert_j] = transform_vector(model.bitangent(face_i, vert_j), mat_view, mat_proj);
+//
+//    uv[vert_j] = model.uv(face_i, vert_j);
+//
+//}
 
-    // normals must be transformed by inverse-transpose of matrices
-    norm[vert_j] = transform_vector(model.normal(face_i, vert_j), mat_view_it, mat_proj_it);
-
-    tan[vert_j] = transform_vector(model.tangent(face_i, vert_j), mat_view, mat_proj);
-    bitan[vert_j] = transform_vector(model.bitangent(face_i, vert_j), mat_view, mat_proj);
-
-    uv[vert_j] = model.uv(face_i, vert_j);
-
-}
-
-void Shader::triangle(Vec3f light_vec, \
+void Shader::rasterize(Vec3f light_vec, \
         std::vector<std::vector<float>>& z_buffer, \
         TGAImage image) {
     
@@ -112,10 +123,16 @@ void Shader::triangle(Vec3f light_vec, \
     
 }
 
-void Shader::world2clip_vert(Vec3f vert) {
-    vert = transform_vertex(vert, mat_view, mat_proj);
+void Shader::fragment(Vec3f bc, TGAImage& image) {
+    
+    
+    
 }
 
-void Shader::world2clip_vec(Vec3f vec) {
-    vec = transform_vector(vec, mat_view, mat_proj);
-}
+//void Shader::world2clip_vert(Vec3f vert) {
+//    vert = transform_vertex(vert, mat_view, mat_proj);
+//}
+//
+//void Shader::world2clip_vec(Vec3f vec) {
+//    vec = transform_vector(vec, mat_view, mat_proj);
+//}

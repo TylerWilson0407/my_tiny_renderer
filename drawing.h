@@ -12,7 +12,25 @@
 #include <iostream>
 #include "geometry.h"
 #include "model.h"
+//#include "render.h"
 #include "tgaimage.h"
+
+template <typename T> struct vec<4,T> {
+    vec() : x(T()), y(T()), z(T()), w(T()) {}
+    vec(T X, T Y, T Z) : x(X), y(Y), z(Z), w(1.f) {}
+    vec(vec<3, T> V) : x(V.x), y(V.y), z(V.z), w(1.f) {}
+    template <class U> vec<4,T>(const vec<4,U> &v);
+          T& operator[](const size_t i) { 
+              assert(i<4);
+              return i<=0 ? x : (1==i ? y : (2==i ? z : w));
+          }
+    const T& operator[](const size_t i) const {
+        assert(i<4);
+        return i<=0 ? x : (1==i ? y : (2==i ? z : w));
+    }
+
+    T x,y,z,w;
+};
 
 Vec3f barycentric(const Vec3f* pts, const Vec2f& P);
 
@@ -48,50 +66,35 @@ struct BoundingBox {
     }
 };
 
-template <typename T> struct vec<4,T> {
-    vec() : x(T()), y(T()), z(T()), w(T()) {}
-    vec(T X, T Y, T Z) : x(X), y(Y), z(Z), w(1.f) {}
-    vec(vec<3, T> V) : x(V.x), y(V.y), z(V.z), w(1.f) {}
-    template <class U> vec<4,T>(const vec<4,U> &v);
-          T& operator[](const size_t i) { 
-              assert(i<4);
-              return i<=0 ? x : (1==i ? y : (2==i ? z : w));
-          }
-    const T& operator[](const size_t i) const {
-        assert(i<4);
-        return i<=0 ? x : (1==i ? y : (2==i ? z : w));
-    }
 
-    T x,y,z,w;
-};
 
-// function to transform a vector by any number of matrices
-template<typename Vec3f, typename... Matrices>
-Vec3f transform_vertex(Vec3f vertex, Matrices&... matrices) {
-    Vec4f vert_homog = embed<4>(vertex);
-    vert_homog =  matr_mult(vert_homog, matrices...);
-    return proj<3>(vert_homog / vert_homog[3]);
-}
-
-template<typename Vec3f, typename... Matrices>
-Vec3f transform_vector(Vec3f vertex, Matrices&... matrices) {
-    Vec4f vert_homog = embed<4>(vertex, 0.f);
-    vert_homog =  matr_mult(vert_homog, matrices...);
-    return proj<3>(vert_homog);
-}
-
-// base case for recursive matr_mult function
-template<typename Vec4f>
-Vec4f matr_mult(Vec4f& vector) {
-    return proj<3>(vector / vector[3]);
-}
-
-// recursive matr_mult function
-template<typename Vec4f, typename Matrix, typename... Matrices>
-Vec4f matr_mult(Vec4f& vector, Matrix& matrix, Matrices&... matrices) {
-    vector = matrix * vector;
-    return matr_mult(vector, matrices...);
-}
+//// function to transform a vector by any number of matrices
+//template<typename Vec3f, typename... Matrices>
+//Vec3f transform_vertex(Vec3f vertex, Matrices&... matrices) {
+//    Vec4f vert_homog = embed<4>(vertex);
+//    vert_homog =  matr_mult(vert_homog, matrices...);
+//    return proj<3>(vert_homog / vert_homog[3]);
+//}
+//
+//template<typename Vec3f, typename... Matrices>
+//Vec3f transform_vector(Vec3f vertex, Matrices&... matrices) {
+//    Vec4f vert_homog = embed<4>(vertex, 0.f);
+//    vert_homog =  matr_mult(vert_homog, matrices...);
+//    return proj<3>(vert_homog);
+//}
+//
+//// base case for recursive matr_mult function
+//template<typename Vec4f>
+//Vec4f matr_mult(Vec4f& vector) {
+//    return proj<3>(vector / vector[3]);
+//}
+//
+//// recursive matr_mult function
+//template<typename Vec4f, typename Matrix, typename... Matrices>
+//Vec4f matr_mult(Vec4f& vector, Matrix& matrix, Matrices&... matrices) {
+//    vector = matrix * vector;
+//    return matr_mult(vector, matrices...);
+//}
 
 template <class T>
 T interpolate(Vec3f bary, T* vert_vals) {

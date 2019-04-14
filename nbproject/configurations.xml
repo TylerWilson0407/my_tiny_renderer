@@ -7,6 +7,7 @@
       <itemPath>drawing.h</itemPath>
       <itemPath>tinyrenderer-files/geometry.h</itemPath>
       <itemPath>tinyrenderer-files/model.h</itemPath>
+      <itemPath>render.h</itemPath>
       <itemPath>shaders.h</itemPath>
       <itemPath>tests.h</itemPath>
       <itemPath>tinyrenderer-files/tgaimage.h</itemPath>
@@ -22,6 +23,7 @@
       <itemPath>tinyrenderer-files/geometry.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
       <itemPath>tinyrenderer-files/model.cpp</itemPath>
+      <itemPath>render.cpp</itemPath>
       <itemPath>shaders.cpp</itemPath>
       <itemPath>tests.cpp</itemPath>
       <itemPath>tinyrenderer-files/tgaimage.cpp</itemPath>
@@ -74,6 +76,10 @@
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="render.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="render.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="shaders.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="shaders.h" ex="false" tool="3" flavor2="0">
@@ -124,6 +130,10 @@
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="render.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="render.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="shaders.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="shaders.h" ex="false" tool="3" flavor2="0">
@@ -163,6 +173,10 @@
       <item path="drawing.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="render.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="render.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="shaders.cpp" ex="false" tool="1" flavor2="0">
       </item>

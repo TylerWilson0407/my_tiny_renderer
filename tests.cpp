@@ -63,13 +63,15 @@ void line_test() {
 
 void small_test() {
     
+    Vec3f v1(0, 0, 0);
+    Vec3f v2(0, 0, 0);
     
-    
+//    std::cout << (v1 == v2) << endl;
 }
 
 void wireframe_test() {
     
-    Model model("tinyrenderer-files/obj/african_head/african_head.obj", Matrix::identity());
+    Model model("tinyrenderer-files/obj/african_head/african_head.obj");
     
     const int width = 700;
     const int height = 700;
@@ -121,7 +123,7 @@ void triangle_model_test() {
     o2w.set_col(3, o2w_trans);
     
     const char* filename = "tinyrenderer-files/obj/african_head/african_head.obj";
-    Model model(filename, o2w);
+    Model model(filename);
     
     // image dimensions
     float asp_ratio = 1.77; //aspect ratio
@@ -173,9 +175,9 @@ void triangle_model_test() {
         
         for (int j = 0;j < 3; j++) {
             verts_world[j] = model.vert(face[j]);
-            verts_world[j] = transform_vertex(verts_world[j], viewmat);
+//            verts_world[j] = transform_vertex(verts_world[j], viewmat);
             
-            verts[j] = transform_vertex(verts_world[j], persp, viewport_mat);
+//            verts[j] = transform_vertex(verts_world[j], persp, viewport_mat);
         }
         
         Vec3f norm = cross((verts_world[1] - verts_world[0]), (verts_world[2] - verts_world[0]));
@@ -201,63 +203,63 @@ void triangle_model_test() {
     return;
 }
 
-void shader_test() {
-    
-    // SHADER
-    Shader shader;
-    
-    // MODEL
-    Matrix o2w = Matrix::identity();
-    Vec3f o2w_trans(1, 1, 2);
-    o2w.set_col(3, o2w_trans);
-    
-    const char* filename = "tinyrenderer-files/obj/african_head/african_head.obj";
-    Model model(filename, o2w);
-    
-    // IMAGE
-    float asp_ratio = 1.77; //aspect ratio
-    
-    int width = 2000;
-    int height = width / asp_ratio;
-    
-    TGAImage image(width, height, TGAImage::RGB);
-    
-    shader.viewport(0, width, 0, height);
-    
-    // Z BUFFER
-    vector<vector<float>> z_buffer(width, vector<float>(height, FLT_MAX));
-    
-    // CAMERA
-    Vec3f to(0.f, 0.f, 0.f);
-    Vec3f from(5.f, 3.f, 5.f);
-    Vec3f up(0.f, 1.f, 0.f);
-    
-    shader.view(from, to, up);
-    
-    // perspective matrix
-    float fov_x = 60; //degrees
-    float fov_y = fov_x / asp_ratio;
-    float n = 1;
-    float f = 6;
-    
-    shader.projection(fov_x, fov_y, n, f);
-    
-    // LIGHT
-    Vec3f light_vec(0, 0, 1);
-    light_vec.normalize();
-    
-    shader.world2clip_vec(light_vec);
-    
-    // view direction vector for back face culling
-    // should not change since it is in camera reference frame, which doesn't change
-    Vec3f view_vec(0.f, 0.f, 1.f);
-    
-    for (int i = 0; i < model.nfaces(); i++) {
-        for (int j = 0; j < 3; j++) {
-            shader.vertex(model, i, j);
-        }
-        shader.triangle(light_vec, z_buffer, image);
-        
-    }
-    
-}
+//void shader_test() {
+//    
+//    // SHADER
+//    Shader shader;
+//    
+//    // MODEL
+//    Matrix o2w = Matrix::identity();
+//    Vec3f o2w_trans(1, 1, 2);
+//    o2w.set_col(3, o2w_trans);
+//    
+//    const char* filename = "tinyrenderer-files/obj/african_head/african_head.obj";
+//    Model model(filename);
+//    
+//    // IMAGE
+//    float asp_ratio = 1.77; //aspect ratio
+//    
+//    int width = 2000;
+//    int height = width / asp_ratio;
+//    
+//    TGAImage image(width, height, TGAImage::RGB);
+//    
+//    shader.viewport(0, width, 0, height);
+//    
+//    // Z BUFFER
+//    vector<vector<float>> z_buffer(width, vector<float>(height, FLT_MAX));
+//    
+//    // CAMERA
+//    Vec3f to(0.f, 0.f, 0.f);
+//    Vec3f from(5.f, 3.f, 5.f);
+//    Vec3f up(0.f, 1.f, 0.f);
+//    
+//    shader.view(from, to, up);
+//    
+//    // perspective matrix
+//    float fov_x = 60; //degrees
+//    float fov_y = fov_x / asp_ratio;
+//    float n = 1;
+//    float f = 6;
+//    
+//    shader.projection(fov_x, fov_y, n, f);
+//    
+//    // LIGHT
+//    Vec3f light_vec(0, 0, 1);
+//    light_vec.normalize();
+//    
+//    shader.world2clip_vec(light_vec);
+//    
+//    // view direction vector for back face culling
+//    // should not change since it is in camera reference frame, which doesn't change
+//    Vec3f view_vec(0.f, 0.f, 1.f);
+//    
+//    for (int i = 0; i < model.nfaces(); i++) {
+//        for (int j = 0; j < 3; j++) {
+//            shader.vertex(model, i, j);
+//        }
+//        shader.rasterize(light_vec, z_buffer, image);
+//        
+//    }
+//    
+//}
