@@ -22,6 +22,7 @@ VertexBuffer::VertexBuffer(Model& model) {
 
 Fragment::Fragment() {}
 
+////////// PIPELINE
 VertexProcessor::VertexProcessor(Matrix& view, Matrix& proj, Matrix& viewport) {
     world2clip = proj * view;
     vp_mat = viewport;
@@ -46,7 +47,7 @@ void VertexProcessor::process(Matrix model_mat, VertexBuffer& vb) {
     }
 }
 
-Rasterizer::Rasterizer(Matrix& viewport, TGAImage& fb) {
+Rasterizer::Rasterizer(TGAImage& fb) {
     image_dims = {fb.get_width(), fb.get_height()};
 }
 
@@ -84,6 +85,15 @@ bool Rasterizer::rasterize(std::vector<Fragment> frag_vec, Triangle triangle, \
         }
     }
     return true;
+}
+
+FragmentProcessor::FragmentProcessor() {};
+
+void FragmentProcessor::process(std::vector<Fragment>& frag_vec, Model& model) {
+    for (auto it = frag_vec.begin(); it != frag_vec.end(); ++it) {
+        Fragment frag = *it;
+        
+    }
 }
 
 ////////// OTHER FUNCTIONS

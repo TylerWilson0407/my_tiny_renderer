@@ -36,7 +36,6 @@ private:
 public:
 };
 
-// struct????
 struct Fragment {
     Fragment();
     Vec2i pos;
@@ -73,8 +72,15 @@ class Rasterizer {
 private:
     Vec2i image_dims;
 public:
-    Rasterizer(Matrix& viewport, TGAImage& framebuffer);
+    Rasterizer(TGAImage& framebuffer);
     bool rasterize(std::vector<Fragment> frag_vec, Triangle triangle, std::vector<std::vector<float>>& zbuffer);
+};
+
+class FragmentProcessor {
+private:
+public:
+    FragmentProcessor();
+    void process(std::vector<Fragment>& frag_vec, Model& model);
 };
 
 ////////// UTILITY FUNCTIONS/CLASSES
