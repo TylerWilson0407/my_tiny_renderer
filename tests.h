@@ -26,5 +26,7 @@ void triangle_model_test();
 
 void shader_test();
 
+void render_test();
+
 #endif /* TESTS_H */
 

@@ -170,3 +170,42 @@ bool face_cull(Triangle triangle) {
         return true;
     }
 }
+
+ModelMatrix::ModelMatrix() {
+    Vec3f zero_vec(0.f, 0.f, 0.f);
+    scale(1.f);
+    rotate(zero_vec);
+    translate(zero_vec);
+}
+
+Matrix ModelMatrix::model2world() {
+    return scale_mat * rot_mat * trans_mat;
+}
+
+void ModelMatrix::scale(float s) {
+    scale(Vec3f(s, s, s));
+}
+
+void ModelMatrix::scale(Vec3f s_vec) {
+    
+}
+
+void ModelMatrix::rotate(Vec3f euler_vec) {
+    
+}
+
+void ModelMatrix::rotate(Vec3f v, float rot) {
+    
+}
+
+void ModelMatrix::translate(Vec3f t) {
+    
+}
+
+Scene::Scene() {
+    
+}
+
+void render_model(Model& model, ModelMatrix& mod_mat, Scene& scene, TGAImage& fb) {
+    
+}

@@ -11,6 +11,7 @@
 #include "drawing.h"
 #include "geometry.h"
 #include "model.h"
+#include "render.h"
 #include "shaders.h"
 #include "tgaimage.h"
 #include "tests.h"
@@ -201,6 +202,27 @@ void triangle_model_test() {
     image.write_tga_file("output/object_world_transform.tga");
     
     return;
+}
+
+void render_test() {
+    
+    const char* modelfile = "tinyrenderer-files/obj/african_head/african_head.obj";
+    ModelMatrix mod_mat;
+    
+    std::vector<Model> model_vec;
+    std::vector<ModelMatrix> modmat_vec;
+    
+    Scene scene;
+    
+    TGAImage fb;
+    
+    // zip this??
+    for (int i = 0; i < model_vec.size(); i++) {
+        Model curr_model = model_vec[i];
+        ModelMatrix curr_modmat = modmat_vec[i];
+        render_model(curr_model, curr_modmat, scene, fb);
+    }
+    
 }
 
 //void shader_test() {

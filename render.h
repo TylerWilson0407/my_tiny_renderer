@@ -36,6 +36,8 @@ private:
 public:
 };
 
+////////// CLASSES/STRUCTS/CONTAINERS
+
 struct Fragment {
     Fragment();
     Vec2i pos;
@@ -107,6 +109,30 @@ T bc_interp(Vec3f bc, T* vert_vals) {
     
     return result;
 }
+
+class ModelMatrix {
+private:
+    Matrix scale_mat;
+    Matrix rot_mat;
+    Matrix trans_mat;
+    void update();
+public:
+    ModelMatrix();
+    Matrix model2world();
+    void scale(float s);
+    void scale(Vec3f s_vec);
+    void rotate(Vec3f euler_vec);
+    void rotate(Vec3f v, float rot);
+    void translate(Vec3f t);
+};
+
+class Scene {
+private:
+public:
+    Scene();
+};
+
+void render_model(Model& model, ModelMatrix& mod_mat, Scene& scene, TGAImage& fb);
 
 #endif /* RENDER_H */
 
