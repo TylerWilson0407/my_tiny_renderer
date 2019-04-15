@@ -212,11 +212,12 @@ void render_test() {
     std::vector<Model> model_vec;
     std::vector<ModelMatrix> modmat_vec;
     
-    Scene scene;
+    Render scene;
+    
+    // transform light_vec here?
     
     TGAImage fb;
     
-    // zip this??
     for (int i = 0; i < model_vec.size(); i++) {
         Model curr_model = model_vec[i];
         ModelMatrix curr_modmat = modmat_vec[i];

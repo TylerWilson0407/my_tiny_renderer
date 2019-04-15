@@ -126,13 +126,25 @@ public:
     void translate(Vec3f t);
 };
 
-class Scene {
+// Do I need/want this class?
+class Render {
 private:
+    TGAImage framebuffer;
+    std::vector<std::vector<float>> z_buffer;
+    Matrix view_;
+    Matrix proj_;
+    Matrix viewport_;
+    Vec3f light_vec_;
 public:
-    Scene();
+    Render();
+    Vec3f get_light_vec();
+    Vec3f set_light_vec(Vec3f light_vec);
+    bool depth_check(Vec2i P, float depth);
+    void view(Vec3f& from, Vec3f& to, Vec3f& up);
+    void projection(float fov_x, float fov_y, float n, float f);
 };
 
-void render_model(Model& model, ModelMatrix& mod_mat, Scene& scene, TGAImage& fb);
+void render_model(Model& model, ModelMatrix& mod_mat, Render& render, TGAImage& fb);
 
 #endif /* RENDER_H */
 

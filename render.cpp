@@ -202,10 +202,10 @@ void ModelMatrix::translate(Vec3f t) {
     
 }
 
-Scene::Scene() {
+Render::Render() {
     
 }
 
-void render_model(Model& model, ModelMatrix& mod_mat, Scene& scene, TGAImage& fb) {
+void render_model(Model& model, ModelMatrix& mod_mat, Render& render, TGAImage& fb) {
     
 }
