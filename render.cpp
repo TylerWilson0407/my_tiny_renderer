@@ -171,6 +171,83 @@ bool face_cull(Triangle triangle) {
     }
 }
 
+Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up) {
+    
+    Vec3f forward = from - to;
+    forward.normalize();
+    Vec3f right = cross(up.normalize(), forward);
+    right.normalize();
+    Vec3f up_ortho = cross(forward, right);
+    
+    Vec3f vec_arr[] = {right, up_ortho, forward};
+    
+    Matrix view_matrix = Matrix::identity();
+    
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 4; j++) {
+            view_matrix[i][j] = (j!=3) ? vec_arr[i][j]: -(vec_arr[i] * from);
+        }
+    }
+    
+    return view_matrix;
+}
+
+Matrix perspective_matrix(float fov_x, float fov_y, float n, float f) {
+    /* Maps 3D points from eye coordinates(viewing frustum) to normalized device
+     coordinates (NDC space). This matrix uses reversed-Z convention, mapping to
+     zero on the far clipping plane and positive 1 on the near clipping plane, 
+     to take advantage of increased floating-point precision near zero to 
+     attempt to cancel out the decreased depth value distribution as Z moves 
+     away from the near plane.  See this blog post:
+     * 
+     https://developer.nvidia.com/content/depth-precision-visualized
+     * 
+     */
+    
+    float l = -n * std::tan((fov_x / 2) * (M_PI / 180));
+    float r = -l;
+    float b = -n * std::tan((fov_y / 2) * (M_PI / 180));
+    float t = -b;
+    
+    Matrix perspective_matrix;
+    
+    perspective_matrix[0][0] = (2 * n) / (r -l);
+    perspective_matrix[0][1] = 0;
+    perspective_matrix[0][2] = (r + l) / (r - l);
+    perspective_matrix[0][3] = 0;
+    
+    perspective_matrix[1][0] = 0;
+    perspective_matrix[1][1] = (2 * n) / (t - b);
+    perspective_matrix[1][2] = (t + b) / (t - b);
+    perspective_matrix[1][3] = 0;
+    
+    perspective_matrix[2][0] = 0;
+    perspective_matrix[2][1] = 0;
+    perspective_matrix[2][2] = n / (f - n);
+    perspective_matrix[2][3] = (n * f) / (f - n);
+    
+    perspective_matrix[3][0] = 0;
+    perspective_matrix[3][1] = 0;
+    perspective_matrix[3][2] = -1;
+    perspective_matrix[3][3] = 0;
+    
+    return perspective_matrix;
+}
+
+Matrix viewport_matrix(int l, int r, int b, int t) {
+    
+    Matrix viewport_matrix = Matrix::identity();
+    
+    viewport_matrix[0][0] = (r - l) / 2.f;
+    viewport_matrix[0][3] = (r + l) / 2.f;
+    viewport_matrix[1][1] = (t - b) / 2.f;
+    viewport_matrix[1][3] = (t + b) / 2.f;
+    viewport_matrix[2][2] = -1;
+    viewport_matrix[2][3] = 1;
+    
+    return viewport_matrix;
+}
+
 ModelMatrix::ModelMatrix() {
     Vec3f zero_vec(0.f, 0.f, 0.f);
     scale(1.f);
@@ -202,10 +279,12 @@ void ModelMatrix::translate(Vec3f t) {
     
 }
 
-Render::Render() {
-    
+Render::Render(TGAImage& fbuffer) {
+    framebuffer = fbuffer;
+    z_buffer.resize(fbuffer.get_width(), std::vector<float>(fbuffer.get_height(), std::numeric_limits<float>::max()));
+    viewport = viewport_matrix(0, fbuffer.get_width(), 0, fbuffer.get_height());
 }
 
-void render_model(Model& model, ModelMatrix& mod_mat, Render& render, TGAImage& fb) {
+void render_model(Model& model, ModelMatrix& mod_mat, Render& render) {
     
 }

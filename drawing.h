@@ -120,9 +120,9 @@ inline TGAColor operator+(const TGAColor& c1, const TGAColor& c2) {
 }
 
 // matrices
-Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up);
-Matrix perspective_matrix(float fov_x, float fov_y, float n, float f);
-Matrix viewport(int l, int r, int b, int t);
+//Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up);
+//Matrix perspective_matrix(float fov_x, float fov_y, float n, float f);
+//Matrix viewport_matrix(int l, int r, int b, int t);
 
 // line drawing functions
 void line(Vec2i p0, Vec2i p1, TGAImage &image, TGAColor color);

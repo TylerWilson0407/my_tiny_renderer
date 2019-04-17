@@ -98,6 +98,10 @@ Vec3f bc_coords(const Vec3f* pts, const Vec2f& P);
 bool barycentric(Vec3f& bc, Vec3f* pts, Vec2i& P);
 bool face_cull(Triangle triangle);
 
+Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up);
+Matrix perspective_matrix(float fov_x, float fov_y, float n, float f);
+Matrix viewport_matrix(int l, int r, int b, int t);
+
 template <class T>
 T bc_interp(Vec3f bc, T* vert_vals) {
     
@@ -126,25 +130,19 @@ public:
     void translate(Vec3f t);
 };
 
-// Do I need/want this class?
 class Render {
 private:
+public:
+    Render(TGAImage& fbuffer);
     TGAImage framebuffer;
     std::vector<std::vector<float>> z_buffer;
-    Matrix view_;
-    Matrix proj_;
-    Matrix viewport_;
-    Vec3f light_vec_;
-public:
-    Render();
-    Vec3f get_light_vec();
-    Vec3f set_light_vec(Vec3f light_vec);
-    bool depth_check(Vec2i P, float depth);
-    void view(Vec3f& from, Vec3f& to, Vec3f& up);
-    void projection(float fov_x, float fov_y, float n, float f);
+    Matrix view;
+    Matrix proj;
+    Matrix viewport;
+    Vec3f light_vec;
 };
 
-void render_model(Model& model, ModelMatrix& mod_mat, Render& render, TGAImage& fb);
+void render_model(Model& model, ModelMatrix& mod_mat, Render& render);
 
 #endif /* RENDER_H */
 

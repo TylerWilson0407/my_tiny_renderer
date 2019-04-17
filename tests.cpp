@@ -162,7 +162,7 @@ void triangle_model_test() {
     Matrix persp = perspective_matrix(fov_x, fov_y, n, f);
     
     // viewport matrix
-    Matrix viewport_mat = viewport(0, width, 0, height);
+    Matrix viewport_mat = viewport_matrix(0, width, 0, height);
     
     // transform light vector
     light_vec = proj<3>(viewmat * embed<4>(light_vec, 0.f));
@@ -206,22 +206,23 @@ void triangle_model_test() {
 
 void render_test() {
     
+    int width = 2000;
+    int height = width / 1.77;
+    
     const char* modelfile = "tinyrenderer-files/obj/african_head/african_head.obj";
     ModelMatrix mod_mat;
     
     std::vector<Model> model_vec;
     std::vector<ModelMatrix> modmat_vec;
     
-    Render scene;
+    TGAImage fbuffer(width, height, TGAImage::RGB);
     
-    // transform light_vec here?
-    
-    TGAImage fb;
+    Render render(fbuffer);
     
     for (int i = 0; i < model_vec.size(); i++) {
         Model curr_model = model_vec[i];
         ModelMatrix curr_modmat = modmat_vec[i];
-        render_model(curr_model, curr_modmat, scene, fb);
+        render_model(curr_model, curr_modmat, render);
     }
     
 }
