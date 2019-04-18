@@ -28,7 +28,7 @@ VertexProcessor::VertexProcessor(Matrix& view, Matrix& proj, Matrix& viewport) {
     vp_mat = viewport;
 }
 
-void VertexProcessor::process(Matrix model_mat, VertexBuffer& vb) {
+void VertexProcessor::process(Matrix& model_mat, VertexBuffer& vb) {
     Matrix model2clip = world2clip * model_mat;
     Vec4f screen_homog;
     for (int i = 0; i < vb.nverts; i++) {;
@@ -51,7 +51,7 @@ Rasterizer::Rasterizer(TGAImage& fb) {
     image_dims = {fb.get_width(), fb.get_height()};
 }
 
-bool Rasterizer::rasterize(std::vector<Fragment> frag_vec, Triangle triangle, \
+bool Rasterizer::rasterize(std::vector<Fragment>& frag_vec, Triangle& triangle, \
         std::vector<std::vector<float>>& zbuffer) {
     
     // discard the triangle if back-facing
@@ -89,15 +89,26 @@ bool Rasterizer::rasterize(std::vector<Fragment> frag_vec, Triangle triangle, \
 
 FragmentProcessor::FragmentProcessor() {};
 
-void FragmentProcessor::process(std::vector<Fragment>& frag_vec, Model& model) {
-    for (auto it = frag_vec.begin(); it != frag_vec.end(); ++it) {
-        Fragment frag = *it;
+void FragmentProcessor::process(std::vector<Fragment>& frag_vec, Model& model, Render& render) {
+    for (int i = 0; i < frag_vec.size(); i++) {
+        Fragment frag = frag_vec[i];
         
+        //tangent space normal
+        Vec3f norm_ts = model.normal(frag.uv);
+        
+        Vec3f normal = frag.tan * norm_ts[0] + frag.bitan * norm_ts[1] + frag.norm * norm_ts[2];
+        
+        float intensity = normal * render.light_vec;
+        
+        if (intensity > 0) {
+            TGAColor color = model.diffuse(frag.uv) * intensity;
+            render.framebuffer.set(frag.pos.x, frag.pos.y, color);
+        }
     }
 }
 
 ////////// OTHER FUNCTIONS
-BoundBox::BoundBox(Triangle triangle, Vec2i image_dims) {
+BoundBox::BoundBox(Triangle& triangle, Vec2i image_dims) {
     const float flt_min = std::numeric_limits<float>::min();
     const float flt_max = std::numeric_limits<float>::max();
     min = {flt_max, flt_max};
@@ -159,7 +170,7 @@ bool barycentric(Vec3f& bc, Vec3f* pts, Vec2i& P) {
     return false;
 }
 
-bool face_cull(Triangle triangle) {
+bool face_cull(Triangle& triangle) {
     Vec3f v0 = proj<3>(triangle.clips[1] - triangle.clips[0]);
     Vec3f v1 = proj<3>(triangle.clips[2] - triangle.clips[0]);
     Vec3f face_normal = cross(v0, v1);
@@ -192,7 +203,7 @@ Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up) {
     return view_matrix;
 }
 
-Matrix perspective_matrix(float fov_x, float fov_y, float n, float f) {
+Matrix projection_matrix(float fovx, float fovy, float n, float f) {
     /* Maps 3D points from eye coordinates(viewing frustum) to normalized device
      coordinates (NDC space). This matrix uses reversed-Z convention, mapping to
      zero on the far clipping plane and positive 1 on the near clipping plane, 
@@ -204,9 +215,9 @@ Matrix perspective_matrix(float fov_x, float fov_y, float n, float f) {
      * 
      */
     
-    float l = -n * std::tan((fov_x / 2) * (M_PI / 180));
+    float l = -n * std::tan((fovx / 2) * (M_PI / 180));
     float r = -l;
-    float b = -n * std::tan((fov_y / 2) * (M_PI / 180));
+    float b = -n * std::tan((fovy / 2) * (M_PI / 180));
     float t = -b;
     
     Matrix perspective_matrix;
@@ -249,14 +260,11 @@ Matrix viewport_matrix(int l, int r, int b, int t) {
 }
 
 ModelMatrix::ModelMatrix() {
-    Vec3f zero_vec(0.f, 0.f, 0.f);
-    scale(1.f);
-    rotate(zero_vec);
-    translate(zero_vec);
+    _model_mat = Matrix::identity();
 }
 
-Matrix ModelMatrix::model2world() {
-    return scale_mat * rot_mat * trans_mat;
+Matrix ModelMatrix::model_mat() {
+    return _model_mat;
 }
 
 void ModelMatrix::scale(float s) {
@@ -285,6 +293,24 @@ Render::Render(TGAImage& fbuffer) {
     viewport = viewport_matrix(0, fbuffer.get_width(), 0, fbuffer.get_height());
 }
 
-void render_model(Model& model, ModelMatrix& mod_mat, Render& render) {
+void render_model(Model& model, Matrix& mod_mat, Render& render) {
     
+    VertexBuffer vb(model);
+    
+    VertexProcessor vp(render.view, render.proj, render.viewport);
+    vp.process(mod_mat, vb);
+    
+    Rasterizer rast(render.framebuffer);
+    FragmentProcessor frag_proc;
+    
+    for (int i = 0; i < model.nfaces(); i++) {
+        Triangle triangle(model.face(i), vb, model);
+        std::vector<Fragment> frag_vec;
+        if (rast.rasterize(frag_vec, triangle, render.z_buffer)) {
+            frag_proc.process(frag_vec, model, render);
+        }
+    }
+    
+    render.framebuffer.flip_vertically();
+    render.framebuffer.write_tga_file("output/render_output.tga");
 }

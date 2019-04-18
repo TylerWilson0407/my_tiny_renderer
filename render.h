@@ -30,12 +30,6 @@ public:
     int nverts;
 };
 
-// Needed?
-class PrimitiveBuffer {
-private:
-public:
-};
-
 ////////// CLASSES/STRUCTS/CONTAINERS
 
 struct Fragment {
@@ -60,76 +54,6 @@ public:
     Vec2f uvs[3];
 };
 
-////////// PIPELINE
-class VertexProcessor {
-private:
-    Matrix world2clip;
-    Matrix vp_mat;
-public:
-    VertexProcessor(Matrix& view, Matrix& proj, Matrix& viewport);
-    void process(Matrix model_mat, VertexBuffer& vb);
-};
-
-class Rasterizer {
-private:
-    Vec2i image_dims;
-public:
-    Rasterizer(TGAImage& framebuffer);
-    bool rasterize(std::vector<Fragment> frag_vec, Triangle triangle, std::vector<std::vector<float>>& zbuffer);
-};
-
-class FragmentProcessor {
-private:
-public:
-    FragmentProcessor();
-    void process(std::vector<Fragment>& frag_vec, Model& model);
-};
-
-////////// UTILITY FUNCTIONS/CLASSES
-class BoundBox {
-private:
-public:
-    BoundBox(Triangle triangle, Vec2i image_dims);
-    Vec2f min;
-    Vec2f max;
-};
-
-Vec3f bc_coords(const Vec3f* pts, const Vec2f& P);
-bool barycentric(Vec3f& bc, Vec3f* pts, Vec2i& P);
-bool face_cull(Triangle triangle);
-
-Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up);
-Matrix perspective_matrix(float fov_x, float fov_y, float n, float f);
-Matrix viewport_matrix(int l, int r, int b, int t);
-
-template <class T>
-T bc_interp(Vec3f bc, T* vert_vals) {
-    
-    T result;
-    
-    for (int i = 0; i < 3; i++) {
-        result = result + vert_vals[i] * bc[i];
-    }
-    
-    return result;
-}
-
-class ModelMatrix {
-private:
-    Matrix scale_mat;
-    Matrix rot_mat;
-    Matrix trans_mat;
-    void update();
-public:
-    ModelMatrix();
-    Matrix model2world();
-    void scale(float s);
-    void scale(Vec3f s_vec);
-    void rotate(Vec3f euler_vec);
-    void rotate(Vec3f v, float rot);
-    void translate(Vec3f t);
-};
-
 class Render {
 private:
 public:
@@ -142,7 +66,77 @@ public:
     Vec3f light_vec;
 };
 
-void render_model(Model& model, ModelMatrix& mod_mat, Render& render);
+////////// PIPELINE
+class VertexProcessor {
+private:
+    Matrix world2clip;
+    Matrix vp_mat;
+public:
+    VertexProcessor(Matrix& view, Matrix& proj, Matrix& viewport);
+    void process(Matrix& model_mat, VertexBuffer& vb);
+};
+
+class Rasterizer {
+private:
+    Vec2i image_dims;
+public:
+    Rasterizer(TGAImage& framebuffer);
+    bool rasterize(std::vector<Fragment>& frag_vec, Triangle& triangle, std::vector<std::vector<float>>& zbuffer);
+};
+
+class FragmentProcessor {
+private:
+public:
+    FragmentProcessor();
+    void process(std::vector<Fragment>& frag_vec, Model& model, Render& render);
+};
+
+////////// UTILITY FUNCTIONS/CLASSES
+class BoundBox {
+private:
+public:
+    BoundBox(Triangle& triangle, Vec2i image_dims);
+    Vec2f min;
+    Vec2f max;
+};
+
+Vec3f bc_coords(const Vec3f* pts, const Vec2f& P);
+bool barycentric(Vec3f& bc, Vec3f* pts, Vec2i& P);
+bool face_cull(Triangle& triangle);
+
+Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up);
+Matrix projection_matrix(float fovx, float fovy, float n, float f);
+Matrix viewport_matrix(int l, int r, int b, int t);
+
+template <class T>
+T bc_interp(Vec3f& bc, T* vert_vals) {
+    
+    T result;
+    
+    for (int i = 0; i < 3; i++) {
+        result = result + vert_vals[i] * bc[i];
+    }
+    
+    return result;
+}
+
+class ModelMatrix {
+private:
+    Matrix _scale_mat;
+    Matrix _rot_mat;
+    Matrix _trans_mat;
+    Matrix _model_mat;
+public:
+    ModelMatrix();
+    Matrix model_mat();
+    void scale(float s);
+    void scale(Vec3f s_vec);
+    void rotate(Vec3f euler_vec);
+    void rotate(Vec3f v, float rot);
+    void translate(Vec3f t);
+};
+
+void render_model(Model& model, Matrix& mod_mat, Render& render);
 
 #endif /* RENDER_H */
 
