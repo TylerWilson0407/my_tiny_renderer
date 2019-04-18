@@ -45,7 +45,7 @@ struct Fragment {
 class Triangle {
 private:
 public:
-    Triangle(std::vector<int> idx, VertexBuffer& vb, Model& model);
+    Triangle(int i_face, VertexBuffer& vb, Model& model);
     Vec4f clips[3];
     Vec3f screens[3];
     Vec3f norms[3];
@@ -131,12 +131,18 @@ public:
     Matrix model_mat();
     void scale(float s);
     void scale(Vec3f s_vec);
+    // use 3 floats here instead to avoid confusion?
     void rotate(Vec3f euler_vec);
     void rotate(Vec3f v, float rot);
     void translate(Vec3f t);
 };
 
 void render_model(Model& model, Matrix& mod_mat, Render& render);
+
+bool depth_check(float depth, Vec2i pos, std::vector<std::vector<float>>& z_buffer);
+
+//TEST
+extern int test_count;
 
 #endif /* RENDER_H */
 

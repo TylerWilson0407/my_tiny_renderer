@@ -206,6 +206,9 @@ void triangle_model_test() {
 
 void render_test() {
     
+    //TEST
+    test_count = 0;
+    
     // frame buffer
     int width = 2000;
     int height = width / 1.77;

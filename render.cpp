@@ -8,10 +8,13 @@
 #include "model.h"
 #include "render.h"
 
+//TEST
+int test_count = 0;
+
 VertexBuffer::VertexBuffer(Model& model) {
     for (int i = 0; i < model.nverts(); i++) {
         clip.push_back(embed<4>(model.vert(i)));
-        screen.push_back(model.vert(i));  // needed?
+        screen.push_back(model.vert(i));
         norm.push_back(embed<4>(model.normal(i), 0.f));
         tan.push_back(embed<4>(model.tangent(i), 0.f));
         bitan.push_back(embed<4>(model.bitangent(i), 0.f));
@@ -31,18 +34,14 @@ VertexProcessor::VertexProcessor(Matrix& view, Matrix& proj, Matrix& viewport) {
 void VertexProcessor::process(Matrix& model_mat, VertexBuffer& vb) {
     Matrix model2clip = world2clip * model_mat;
     Vec4f screen_homog;
-    for (int i = 0; i < vb.nverts; i++) {;
+    for (int i = 0; i < vb.nverts; i++) {
         vb.clip[i] = model2clip * vb.clip[i];
         vb.norm[i] = model2clip.invert_transpose() * vb.norm[i];
         vb.tan[i] = model2clip * vb.tan[i];
         vb.bitan[i] = model2clip * vb.bitan[i];
         
-        /* Screen coords are usually calculated in the rasterization stage but 
-         I'm doing here since we are using a frame buffer and can have separate
-         vectors for clip and screen coords.
-         */
         screen_homog = vp_mat * vb.clip[i];
-        vb.screen[i] = proj<3>(vb.clip[i] / vb.clip[i][3]);
+        vb.screen[i] = proj<3>(screen_homog / screen_homog[3]);
         
     }
 }
@@ -73,7 +72,7 @@ bool Rasterizer::rasterize(std::vector<Fragment>& frag_vec, Triangle& triangle, 
                 Vec3f frag_pos = bc_interp(bc, triangle.screens);
                 frag.pos = proj<2>(frag_pos);
                 frag.depth = frag_pos[2];
-                if (frag.depth < zbuffer[P.x][P.y]) {
+                if (depth_check(frag.depth, frag.pos, zbuffer)) {
                     frag.norm = bc_interp(bc, triangle.norms);
                     frag.tan = bc_interp(bc, triangle.tans);
                     frag.bitan = bc_interp(bc, triangle.bitans);
@@ -98,8 +97,8 @@ void FragmentProcessor::process(std::vector<Fragment>& frag_vec, Model& model, R
         
         Vec3f normal = frag.tan * norm_ts[0] + frag.bitan * norm_ts[1] + frag.norm * norm_ts[2];
         
-        float intensity = normal * render.light_vec;
-        
+        float intensity = frag.norm * render.light_vec;
+        test_count++;
         if (intensity > 0) {
             TGAColor color = model.diffuse(frag.uv) * intensity;
             render.framebuffer.set(frag.pos.x, frag.pos.y, color);
@@ -109,10 +108,9 @@ void FragmentProcessor::process(std::vector<Fragment>& frag_vec, Model& model, R
 
 ////////// OTHER FUNCTIONS
 BoundBox::BoundBox(Triangle& triangle, Vec2i image_dims) {
-    const float flt_min = std::numeric_limits<float>::min();
     const float flt_max = std::numeric_limits<float>::max();
     min = {flt_max, flt_max};
-    max = {flt_min, flt_min};
+    max = {-flt_max, -flt_max};
 
     for (int i = 0; i < 3; ++i) {
         min.x = std::min(triangle.screens[i].x, min.x);
@@ -127,14 +125,15 @@ BoundBox::BoundBox(Triangle& triangle, Vec2i image_dims) {
     max.y = std::min(image_dims.y - 1.f, max.y);
 }
 
-Triangle::Triangle(std::vector<int> idx, VertexBuffer& vb, Model& model) {
-    for (int i = 0; i < 3; i++) {
-        clips[i] = vb.clip[idx[i]];
-        screens[i] = vb.screen[idx[i]];
-        norms[i] = proj<3>(vb.norm[idx[i]]);
-        tans[i] = proj<3>(vb.tan[idx[i]]);
-        bitans[i] = proj<3>(vb.bitan[idx[i]]);
-        uvs[i] = model.uv(idx[i]);
+Triangle::Triangle(int i_face, VertexBuffer& vb, Model& model) {
+    std::vector<int> face = model.face(i_face);
+    for (int j = 0; j < 3; j++) {
+        clips[j] = vb.clip[face[j]];
+        screens[j] = vb.screen[face[j]];
+        norms[j] = proj<3>(vb.norm[face[j]]);
+        tans[j] = proj<3>(vb.tan[face[j]]);
+        bitans[j] = proj<3>(vb.bitan[face[j]]);
+        uvs[j] = model.uv(i_face, j);
     }
 }
 
@@ -174,7 +173,7 @@ bool face_cull(Triangle& triangle) {
     Vec3f v0 = proj<3>(triangle.clips[1] - triangle.clips[0]);
     Vec3f v1 = proj<3>(triangle.clips[2] - triangle.clips[0]);
     Vec3f face_normal = cross(v0, v1);
-    const Vec3f view_vector(0.f, 0.f, 1.f);
+    const Vec3f view_vector(0.f, 0.f, -1.f);
     if (!((face_normal * view_vector) > 0)) {
         return false;
     } else {
@@ -289,7 +288,7 @@ void ModelMatrix::translate(Vec3f t) {
 
 Render::Render(TGAImage& fbuffer) {
     framebuffer = fbuffer;
-    z_buffer.resize(fbuffer.get_width(), std::vector<float>(fbuffer.get_height(), std::numeric_limits<float>::max()));
+    z_buffer.resize(fbuffer.get_width(), std::vector<float>(fbuffer.get_height(), -std::numeric_limits<float>::max()));
     viewport = viewport_matrix(0, fbuffer.get_width(), 0, fbuffer.get_height());
 }
 
@@ -304,13 +303,25 @@ void render_model(Model& model, Matrix& mod_mat, Render& render) {
     FragmentProcessor frag_proc;
     
     for (int i = 0; i < model.nfaces(); i++) {
-        Triangle triangle(model.face(i), vb, model);
+        Triangle triangle(i, vb, model);
         std::vector<Fragment> frag_vec;
         if (rast.rasterize(frag_vec, triangle, render.z_buffer)) {
             frag_proc.process(frag_vec, model, render);
         }
     }
     
+    std::cout << test_count << std::endl;
     render.framebuffer.flip_vertically();
     render.framebuffer.write_tga_file("output/render_output.tga");
+}
+
+bool depth_check(float depth, Vec2i pos, std::vector<std::vector<float>>& z_buffer) {
+    /* assumes reverse-Z(0 at far plane, 1 at near plane), so checks if depth 
+     * is greater than z_buffer value. */
+    if (depth > z_buffer[pos.x][pos.y]) {
+        z_buffer[pos.x][pos.y] = depth;
+        return true;
+    } else {
+        return false;
+    }
 }
