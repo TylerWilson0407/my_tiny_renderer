@@ -60,6 +60,7 @@ public:
     Render(TGAImage& fbuffer);
     TGAImage framebuffer;
     std::vector<std::vector<float>> z_buffer;
+    std::vector<std::vector<float>> shadow_buffer;
     Matrix view;
     Matrix proj;
     Matrix viewport;
@@ -70,6 +71,7 @@ public:
 class VertexProcessor {
 private:
     Matrix world2clip;
+    Matrix view_matrix;
     Matrix vp_mat;
 public:
     VertexProcessor(Matrix& view, Matrix& proj, Matrix& viewport);

@@ -206,16 +206,13 @@ void triangle_model_test() {
 
 void render_test() {
     
-    //TEST
-    test_count = 0;
-    
     // frame buffer
     int width = 2000;
     int height = width / 1.77;
     
     // view matrix
     Vec3f to(0.f, 0.f, 0.f);
-    Vec3f from(5.f, 3.f, 5.f);
+    Vec3f from(1.5, 0.f, 6.f);
     Vec3f up(0.f, 1.f, 0.f);
     
     // projection matrix
@@ -225,6 +222,7 @@ void render_test() {
     float f = 6;
     
     const char* modelfile = "tinyrenderer-files/obj/african_head/african_head.obj";
+//    const char* modelfile = "tinyrenderer-files/obj/diablo3_pose/diablo3_pose.obj";
     Model model(modelfile);
     ModelMatrix mod_mat;
     
@@ -241,7 +239,8 @@ void render_test() {
     render.view = view_matrix(from, to, up);
     render.proj = projection_matrix(fovx, fovy, n, f);
     
-    render.light_vec = Vec3f(2, 3, 1);
+    render.light_vec = Vec3f(3, 3, 1);
+    render.light_vec.normalize();
     
     for (int i = 0; i < model_vec.size(); i++) {
         Model curr_model = model_vec[i];

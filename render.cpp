@@ -8,9 +8,6 @@
 #include "model.h"
 #include "render.h"
 
-//TEST
-int test_count = 0;
-
 VertexBuffer::VertexBuffer(Model& model) {
     for (int i = 0; i < model.nverts(); i++) {
         clip.push_back(embed<4>(model.vert(i)));
@@ -28,21 +25,21 @@ Fragment::Fragment() {}
 ////////// PIPELINE
 VertexProcessor::VertexProcessor(Matrix& view, Matrix& proj, Matrix& viewport) {
     world2clip = proj * view;
+    view_matrix = view;
     vp_mat = viewport;
 }
 
 void VertexProcessor::process(Matrix& model_mat, VertexBuffer& vb) {
     Matrix model2clip = world2clip * model_mat;
-    Vec4f screen_homog;
+    
     for (int i = 0; i < vb.nverts; i++) {
         vb.clip[i] = model2clip * vb.clip[i];
-        vb.norm[i] = model2clip.invert_transpose() * vb.norm[i];
-        vb.tan[i] = model2clip * vb.tan[i];
-        vb.bitan[i] = model2clip * vb.bitan[i];
+        vb.norm[i] = view_matrix.invert_transpose() * vb.norm[i];
+        vb.tan[i] = view_matrix * vb.tan[i];
+        vb.bitan[i] = view_matrix * vb.bitan[i];
         
-        screen_homog = vp_mat * vb.clip[i];
+        Vec4f screen_homog = vp_mat * vb.clip[i];
         vb.screen[i] = proj<3>(screen_homog / screen_homog[3]);
-        
     }
 }
 
@@ -96,9 +93,9 @@ void FragmentProcessor::process(std::vector<Fragment>& frag_vec, Model& model, R
         Vec3f norm_ts = model.normal(frag.uv);
         
         Vec3f normal = frag.tan * norm_ts[0] + frag.bitan * norm_ts[1] + frag.norm * norm_ts[2];
+        normal.normalize();
         
-        float intensity = frag.norm * render.light_vec;
-        test_count++;
+        float intensity = normal * render.light_vec;
         if (intensity > 0) {
             TGAColor color = model.diffuse(frag.uv) * intensity;
             render.framebuffer.set(frag.pos.x, frag.pos.y, color);
@@ -130,9 +127,9 @@ Triangle::Triangle(int i_face, VertexBuffer& vb, Model& model) {
     for (int j = 0; j < 3; j++) {
         clips[j] = vb.clip[face[j]];
         screens[j] = vb.screen[face[j]];
-        norms[j] = proj<3>(vb.norm[face[j]]);
-        tans[j] = proj<3>(vb.tan[face[j]]);
-        bitans[j] = proj<3>(vb.bitan[face[j]]);
+        norms[j] = proj<3>(vb.norm[face[j]]).normalize();
+        tans[j] = proj<3>(vb.tan[face[j]]).normalize();
+        bitans[j] = proj<3>(vb.bitan[face[j]]).normalize();
         uvs[j] = model.uv(i_face, j);
     }
 }
@@ -182,6 +179,7 @@ bool face_cull(Triangle& triangle) {
 }
 
 Matrix view_matrix(const Vec3f& from, const Vec3f& to, Vec3f& up) {
+    
     
     Vec3f forward = from - to;
     forward.normalize();
@@ -252,8 +250,6 @@ Matrix viewport_matrix(int l, int r, int b, int t) {
     viewport_matrix[0][3] = (r + l) / 2.f;
     viewport_matrix[1][1] = (t - b) / 2.f;
     viewport_matrix[1][3] = (t + b) / 2.f;
-    viewport_matrix[2][2] = -1;
-    viewport_matrix[2][3] = 1;
     
     return viewport_matrix;
 }
@@ -294,6 +290,11 @@ Render::Render(TGAImage& fbuffer) {
 
 void render_model(Model& model, Matrix& mod_mat, Render& render) {
     
+    ///////
+//    render.light_vec = proj<3>(render.proj * render.view * embed<4>(render.light_vec, 0.f));
+    render.light_vec = proj<3>(render.view * embed<4>(render.light_vec, 0.f));
+    ////////
+    
     VertexBuffer vb(model);
     
     VertexProcessor vp(render.view, render.proj, render.viewport);
@@ -310,7 +311,6 @@ void render_model(Model& model, Matrix& mod_mat, Render& render) {
         }
     }
     
-    std::cout << test_count << std::endl;
     render.framebuffer.flip_vertically();
     render.framebuffer.write_tga_file("output/render_output.tga");
 }
