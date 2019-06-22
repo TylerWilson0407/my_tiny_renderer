@@ -34,9 +34,10 @@ void VertexProcessor::process(Matrix& model_mat, VertexBuffer& vb) {
     
     for (int i = 0; i < vb.nverts; i++) {
         vb.clip[i] = model2clip * vb.clip[i];
-        vb.norm[i] = view_matrix.invert_transpose() * vb.norm[i];
-        vb.tan[i] = view_matrix * vb.tan[i];
-        vb.bitan[i] = view_matrix * vb.bitan[i];
+        
+        vb.norm[i] = model2clip.invert_transpose() * vb.norm[i];
+        vb.tan[i] = model2clip * vb.tan[i];
+        vb.bitan[i] = model2clip * vb.bitan[i];
         
         Vec4f screen_homog = vp_mat * vb.clip[i];
         vb.screen[i] = proj<3>(screen_homog / screen_homog[3]);
@@ -95,11 +96,17 @@ void FragmentProcessor::process(std::vector<Fragment>& frag_vec, Model& model, R
         Vec3f normal = frag.tan * norm_ts[0] + frag.bitan * norm_ts[1] + frag.norm * norm_ts[2];
         normal.normalize();
         
-        float intensity = normal * render.light_vec;
-        if (intensity > 0) {
-            TGAColor color = model.diffuse(frag.uv) * intensity;
-            render.framebuffer.set(frag.pos.x, frag.pos.y, color);
-        }
+        //diffuse lighting
+        float diff_intensity = std::max(normal * render.light_vec, 0.f);
+        
+        //specular lighting
+        Vec3f refl = normal * 2 * (render.light_vec * normal) - render.light_vec;
+        float spec_intensity = std::pow(normal * refl, model.specular(frag.uv));
+        
+        float total_intensity = render.ambient + render.diffuse * diff_intensity + render.specular * spec_intensity;
+        
+        TGAColor color = model.diffuse(frag.uv) * total_intensity;
+        render.framebuffer.set(frag.pos.x, frag.pos.y, color);
     }
 }
 
@@ -290,10 +297,7 @@ Render::Render(TGAImage& fbuffer) {
 
 void render_model(Model& model, Matrix& mod_mat, Render& render) {
     
-    ///////
-//    render.light_vec = proj<3>(render.proj * render.view * embed<4>(render.light_vec, 0.f));
     render.light_vec = proj<3>(render.view * embed<4>(render.light_vec, 0.f));
-    ////////
     
     VertexBuffer vb(model);
     
@@ -312,7 +316,6 @@ void render_model(Model& model, Matrix& mod_mat, Render& render) {
     }
     
     render.framebuffer.flip_vertically();
-    render.framebuffer.write_tga_file("output/render_output.tga");
 }
 
 bool depth_check(float depth, Vec2i pos, std::vector<std::vector<float>>& z_buffer) {

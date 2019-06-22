@@ -4,12 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>drawing.h</itemPath>
       <itemPath>tinyrenderer-files/geometry.h</itemPath>
       <itemPath>tinyrenderer-files/model.h</itemPath>
       <itemPath>render.h</itemPath>
-      <itemPath>shaders.h</itemPath>
-      <itemPath>tests.h</itemPath>
       <itemPath>tinyrenderer-files/tgaimage.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -19,13 +16,10 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>drawing.cpp</itemPath>
       <itemPath>tinyrenderer-files/geometry.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
       <itemPath>tinyrenderer-files/model.cpp</itemPath>
       <itemPath>render.cpp</itemPath>
-      <itemPath>shaders.cpp</itemPath>
-      <itemPath>tests.cpp</itemPath>
       <itemPath>tinyrenderer-files/tgaimage.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -70,23 +64,11 @@
           </incDir>
         </ccTool>
       </compileType>
-      <item path="drawing.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="drawing.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="render.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="render.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="shaders.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="shaders.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tests.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tinyrenderer-files/geometry.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -124,23 +106,11 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="drawing.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="drawing.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="render.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="render.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="shaders.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="shaders.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tests.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tinyrenderer-files/geometry.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -168,23 +138,11 @@
           </incDir>
         </ccTool>
       </compileType>
-      <item path="drawing.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="drawing.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="render.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="render.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="shaders.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="shaders.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tests.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tinyrenderer-files/geometry.cpp" ex="false" tool="1" flavor2="0">
       </item>

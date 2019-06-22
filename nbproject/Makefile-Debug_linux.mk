@@ -35,11 +35,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/drawing.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/render.o \
-	${OBJECTDIR}/shaders.o \
-	${OBJECTDIR}/tests.o \
 	${OBJECTDIR}/tinyrenderer-files/geometry.o \
 	${OBJECTDIR}/tinyrenderer-files/model.o \
 	${OBJECTDIR}/tinyrenderer-files/tgaimage.o
@@ -69,11 +66,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/my_tiny_renderer: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/my_tiny_renderer ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/drawing.o: drawing.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/drawing.o drawing.cpp
-
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -83,16 +75,6 @@ ${OBJECTDIR}/render.o: render.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/render.o render.cpp
-
-${OBJECTDIR}/shaders.o: shaders.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/shaders.o shaders.cpp
-
-${OBJECTDIR}/tests.o: tests.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -Itinyrenderer-files -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tests.o tests.cpp
 
 ${OBJECTDIR}/tinyrenderer-files/geometry.o: tinyrenderer-files/geometry.cpp
 	${MKDIR} -p ${OBJECTDIR}/tinyrenderer-files

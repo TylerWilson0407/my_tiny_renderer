@@ -59,8 +59,10 @@ private:
 public:
     Render(TGAImage& fbuffer);
     TGAImage framebuffer;
+    float ambient;
+    float diffuse;
+    float specular;
     std::vector<std::vector<float>> z_buffer;
-    std::vector<std::vector<float>> shadow_buffer;
     Matrix view;
     Matrix proj;
     Matrix viewport;
@@ -133,7 +135,6 @@ public:
     Matrix model_mat();
     void scale(float s);
     void scale(Vec3f s_vec);
-    // use 3 floats here instead to avoid confusion?
     void rotate(Vec3f euler_vec);
     void rotate(Vec3f v, float rot);
     void translate(Vec3f t);
